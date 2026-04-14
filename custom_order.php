@@ -4,12 +4,22 @@ declare(strict_types=1);
 require_once __DIR__ . '/includes/auth.php';
 requireLogin();
 
+/* =========================================================
+   ПОДГОТОВКА ДАННЫХ
+   ========================================================= */
+
 $userId = (int)$_SESSION['user_id'];
 $materialsList = getMaterialsList();
 $errors = [];
 $estimatedPricePreview = null;
 
-$stmt = $mysqli->prepare("SELECT name, email, phone FROM users WHERE id = ? LIMIT 1");
+/* Получаем данные текущего пользователя */
+$stmt = $mysqli->prepare("
+    SELECT id, name, email, phone
+    FROM users
+    WHERE id = ?
+    LIMIT 1
+");
 $stmt->bind_param('i', $userId);
 $stmt->execute();
 $user = $stmt->get_result()->fetch_assoc();
@@ -20,13 +30,21 @@ if (!$user) {
     redirect('logout.php');
 }
 
+/* =========================================================
+   ОБРАБОТКА ФОРМЫ
+   ========================================================= */
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $material = trim((string)($_POST['material'] ?? ''));
     $color = trim((string)($_POST['color'] ?? ''));
-    $layerHeight = (float)($_POST['layer_height'] ?? 0);
-    $infill = (int)($_POST['infill'] ?? 0);
-    $weight = (float)($_POST['weight'] ?? 0);
+    $layerHeight = isset($_POST['layer_height']) ? (float)$_POST['layer_height'] : 0.0;
+    $infill = isset($_POST['infill']) ? (int)$_POST['infill'] : 0;
+    $weight = isset($_POST['weight']) ? (float)$_POST['weight'] : 0.0;
     $comment = trim((string)($_POST['comment'] ?? ''));
+
+    /* =========================================================
+       ВАЛИДАЦИЯ
+       ========================================================= */
 
     if (!in_array($material, $materialsList, true)) {
         $errors[] = 'Выберите материал из списка.';
@@ -48,21 +66,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $errors[] = 'Загрузите файл модели.';
     }
 
-    $estimatedPricePreview = calculateCustomOrderPrice($material, $weight, $layerHeight, $infill);
+    /* Предварительный расчёт цены */
+    if (!$errors) {
+        $estimatedPricePreview = calculateCustomOrderPrice($material, $weight, $layerHeight, $infill);
+    }
+
+    /* =========================================================
+       ПРОВЕРКА И СОХРАНЕНИЕ ФАЙЛА
+       ========================================================= */
 
     if (!$errors) {
         $allowedExtensions = ['stl', 'obj', 'step', 'stp'];
-        $fileName = $_FILES['model_file']['name'];
-        $fileTmpPath = $_FILES['model_file']['tmp_name'];
-        $fileSize = (int)$_FILES['model_file']['size'];
-        $extension = strtolower(pathinfo($fileName, PATHINFO_EXTENSION));
 
-        if (!in_array($extension, $allowedExtensions, true)) {
-            $errors[] = 'Разрешены только файлы .stl, .obj, .step, .stp.';
+        $originalFileName = (string)$_FILES['model_file']['name'];
+        $tmpFilePath = (string)$_FILES['model_file']['tmp_name'];
+        $fileSize = (int)$_FILES['model_file']['size'];
+
+        $fileExtension = strtolower(pathinfo($originalFileName, PATHINFO_EXTENSION));
+
+        if (!in_array($fileExtension, $allowedExtensions, true)) {
+            $errors[] = 'Разрешены только файлы .stl, .obj, .step и .stp.';
         }
 
         if ($fileSize > 20 * 1024 * 1024) {
-            $errors[] = 'Файл слишком большой. Максимум 20 МБ.';
+            $errors[] = 'Файл слишком большой. Максимальный размер: 20 МБ.';
         }
 
         $uploadDir = __DIR__ . '/uploads/models/';
@@ -70,46 +97,70 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (!is_dir($uploadDir)) {
             mkdir($uploadDir, 0777, true);
         }
+    }
 
-        if (!$errors) {
-            $newFileName = uniqid('model_', true) . '.' . $extension;
-            $destination = $uploadDir . $newFileName;
+    /* =========================================================
+       СОХРАНЕНИЕ В БД
+       ========================================================= */
 
-            if (!move_uploaded_file($fileTmpPath, $destination)) {
-                $errors[] = 'Не удалось сохранить файл.';
-            } else {
-                $modelFileForDb = 'uploads/models/' . $newFileName;
-                $estimatedPrice = $estimatedPricePreview;
+    if (!$errors) {
+        $newFileName = uniqid('model_', true) . '.' . $fileExtension;
+        $destinationPath = $uploadDir . $newFileName;
 
-                $stmt = $mysqli->prepare("
-                    INSERT INTO custom_orders (
-                        user_id, customer_name, customer_email, customer_phone,
-                        material, color, layer_height, infill, estimated_price,
-                        status, model_file, comment
-                    )
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'new', ?, ?)
-                ");
-                $stmt->bind_param(
-                        'isssssidsss',
-                        $userId,
-                        $user['name'],
-                        $user['email'],
-                        $user['phone'],
-                        $material,
-                        $color,
-                        $layerHeight,
-                        $infill,
-                        $estimatedPrice,
-                        $modelFileForDb,
-                        $comment
-                );
-                $stmt->execute();
+        if (!move_uploaded_file($tmpFilePath, $destinationPath)) {
+            $errors[] = 'Не удалось сохранить загруженный файл.';
+        } else {
+            $modelFileForDb = 'uploads/models/' . $newFileName;
+            $estimatedPrice = calculateCustomOrderPrice($material, $weight, $layerHeight, $infill);
+
+            $stmt = $mysqli->prepare("
+                INSERT INTO custom_orders (
+                    user_id,
+                    customer_name,
+                    customer_email,
+                    customer_phone,
+                    material,
+                    color,
+                    layer_height,
+                    infill,
+                    estimated_price,
+                    status,
+                    model_file,
+                    comment
+                )
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'new', ?, ?)
+            ");
+
+            $stmt->bind_param(
+                    'isssssiddss',
+                    $userId,
+                    $user['name'],
+                    $user['email'],
+                    $user['phone'],
+                    $material,
+                    $color,
+                    $layerHeight,
+                    $infill,
+                    $estimatedPrice,
+                    $modelFileForDb,
+                    $comment
+            );
+
+            if ($stmt->execute()) {
                 $stmt->close();
 
                 setFlash('success', 'Индивидуальный заказ успешно отправлен.');
                 redirect('profile.php');
+            } else {
+                $stmt->close();
+                $errors[] = 'Не удалось сохранить заказ в базу данных.';
             }
         }
+    }
+
+    /* Если есть ошибки, но данные валидные для расчёта, оставляем превью цены */
+    if ($estimatedPricePreview === null && $material !== '' && $layerHeight > 0 && $weight > 0 && $infill >= 0 && $infill <= 100) {
+        $estimatedPricePreview = calculateCustomOrderPrice($material, $weight, $layerHeight, $infill);
     }
 }
 
@@ -121,7 +172,7 @@ require_once __DIR__ . '/includes/header.php';
         <p>Загрузите 3D-файл, выберите параметры печати и получите примерную стоимость.</p>
     </div>
 
-<?php if ($errors): ?>
+<?php if (!empty($errors)): ?>
     <div class="message error">
         <?php foreach ($errors as $error): ?>
             <div><?= e($error) ?></div>
@@ -132,12 +183,12 @@ require_once __DIR__ . '/includes/header.php';
     <div class="calculator-box">
         <h2>Калькулятор стоимости</h2>
         <p class="small-text">
-            Это ориентировочный расчёт. Финальная цена может отличаться в зависимости от сложности модели,
-            времени печати и дополнительной обработки.
+            Это ориентировочный расчёт. Финальная стоимость может отличаться в зависимости
+            от сложности модели, времени печати и дополнительной обработки.
         </p>
 
         <div class="calculator-price" id="pricePreview">
-            €0.00
+            €<?= number_format((float)($estimatedPricePreview ?? 0), 2) ?>
         </div>
     </div>
 
@@ -165,6 +216,7 @@ require_once __DIR__ . '/includes/header.php';
         <input
                 type="number"
                 step="0.01"
+                min="0.01"
                 id="layer_height"
                 name="layer_height"
                 value="<?= e(old('layer_height', '0.20')) ?>"
@@ -186,6 +238,7 @@ require_once __DIR__ . '/includes/header.php';
         <input
                 type="number"
                 step="0.01"
+                min="0.01"
                 id="weight"
                 name="weight"
                 value="<?= e(old('weight', '50')) ?>"
@@ -260,6 +313,7 @@ require_once __DIR__ . '/includes/header.php';
                 const ratePerGram = materialRates[material] || 0.50;
 
                 let layerCoefficient = 1.0;
+
                 if (layerHeight <= 0.12) {
                     layerCoefficient = 1.35;
                 } else if (layerHeight <= 0.16) {
@@ -273,7 +327,6 @@ require_once __DIR__ . '/includes/header.php';
                 }
 
                 const infillCoefficient = 1.0 + (infill / 200);
-
                 const price = (basePrice + (weight * ratePerGram)) * layerCoefficient * infillCoefficient;
 
                 pricePreview.textContent = '€' + price.toFixed(2);

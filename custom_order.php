@@ -90,18 +90,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'new', ?, ?)
                 ");
                 $stmt->bind_param(
-                    'isssssidsss',
-                    $userId,
-                    $user['name'],
-                    $user['email'],
-                    $user['phone'],
-                    $material,
-                    $color,
-                    $layerHeight,
-                    $infill,
-                    $estimatedPrice,
-                    $modelFileForDb,
-                    $comment
+                        'isssssidsss',
+                        $userId,
+                        $user['name'],
+                        $user['email'],
+                        $user['phone'],
+                        $material,
+                        $color,
+                        $layerHeight,
+                        $infill,
+                        $estimatedPrice,
+                        $modelFileForDb,
+                        $comment
                 );
                 $stmt->execute();
                 $stmt->close();
@@ -118,7 +118,7 @@ require_once __DIR__ . '/includes/header.php';
 
     <div class="page-header">
         <h1>Индивидуальный заказ</h1>
-        <p>Загрузите 3D-файл, выберите параметры печати и отправьте заявку.</p>
+        <p>Загрузите 3D-файл, выберите параметры печати и получите примерную стоимость.</p>
     </div>
 
 <?php if ($errors): ?>
@@ -129,13 +129,19 @@ require_once __DIR__ . '/includes/header.php';
     </div>
 <?php endif; ?>
 
-<?php if ($estimatedPricePreview !== null): ?>
-    <div class="message info">
-        Ориентировочная стоимость: <strong>€<?= number_format((float)$estimatedPricePreview, 2) ?></strong>
-    </div>
-<?php endif; ?>
+    <div class="calculator-box">
+        <h2>Калькулятор стоимости</h2>
+        <p class="small-text">
+            Это ориентировочный расчёт. Финальная цена может отличаться в зависимости от сложности модели,
+            времени печати и дополнительной обработки.
+        </p>
 
-    <form method="post" enctype="multipart/form-data">
+        <div class="calculator-price" id="pricePreview">
+            €0.00
+        </div>
+    </div>
+
+    <form method="post" enctype="multipart/form-data" id="customOrderForm">
         <label for="material">Материал</label>
         <select id="material" name="material" required>
             <option value="">Выберите материал</option>
@@ -147,25 +153,140 @@ require_once __DIR__ . '/includes/header.php';
         </select>
 
         <label for="color">Цвет</label>
-        <input type="text" id="color" name="color" value="<?= e(old('color')) ?>" placeholder="Например: чёрный, белый, красный">
+        <input
+                type="text"
+                id="color"
+                name="color"
+                value="<?= e(old('color')) ?>"
+                placeholder="Например: чёрный, белый, красный"
+        >
 
         <label for="layer_height">Высота слоя (мм)</label>
-        <input type="number" step="0.01" id="layer_height" name="layer_height" value="<?= e(old('layer_height')) ?>" required>
+        <input
+                type="number"
+                step="0.01"
+                id="layer_height"
+                name="layer_height"
+                value="<?= e(old('layer_height', '0.20')) ?>"
+                required
+        >
 
         <label for="infill">Заполнение (%)</label>
-        <input type="number" min="0" max="100" id="infill" name="infill" value="<?= e(old('infill', '20')) ?>" required>
+        <input
+                type="number"
+                min="0"
+                max="100"
+                id="infill"
+                name="infill"
+                value="<?= e(old('infill', '20')) ?>"
+                required
+        >
 
         <label for="weight">Вес модели (г)</label>
-        <input type="number" step="0.01" id="weight" name="weight" value="<?= e(old('weight')) ?>" required>
+        <input
+                type="number"
+                step="0.01"
+                id="weight"
+                name="weight"
+                value="<?= e(old('weight', '50')) ?>"
+                required
+        >
 
         <label for="model_file">Файл модели</label>
-        <input type="file" id="model_file" name="model_file" accept=".stl,.obj,.step,.stp" required>
+        <input
+                type="file"
+                id="model_file"
+                name="model_file"
+                accept=".stl,.obj,.step,.stp"
+                required
+        >
 
         <label for="comment">Комментарий</label>
         <textarea id="comment" name="comment"><?= e(old('comment')) ?></textarea>
 
         <button type="submit">Отправить заказ</button>
     </form>
+
+    <script>
+        (function () {
+            const materialSelect = document.getElementById('material');
+            const layerHeightInput = document.getElementById('layer_height');
+            const infillInput = document.getElementById('infill');
+            const weightInput = document.getElementById('weight');
+            const pricePreview = document.getElementById('pricePreview');
+
+            const materialRates = {
+                'Bambu PLA Basic': 0.35,
+                'Bambu PLA Matte': 0.37,
+                'Bambu PLA Tough': 0.42,
+                'Bambu PLA Silk': 0.40,
+                'Bambu PLA Silk+': 0.43,
+                'Bambu PLA Galaxy': 0.41,
+                'Bambu PLA Marble': 0.43,
+                'Bambu PLA Translucent': 0.39,
+                'Bambu PLA Dynamic': 0.40,
+                'Bambu PLA Glow': 0.50,
+                'Bambu PLA Metal': 0.48,
+                'Bambu PLA Wood': 0.46,
+                'Bambu PLA-CF': 0.55,
+                'Bambu PETG Basic': 0.40,
+                'Bambu PETG Translucent': 0.42,
+                'Bambu PETG HF': 0.45,
+                'Bambu PETG-CF': 0.58,
+                'Bambu ABS': 0.44,
+                'Bambu ASA': 0.46,
+                'Bambu PC': 0.60,
+                'Bambu PA (Nylon)': 0.62,
+                'Bambu PA-CF': 0.70,
+                'Bambu PAHT-CF': 0.78,
+                'Bambu TPU 95A': 0.52,
+                'Bambu Support G': 0.65,
+                'Bambu Support W': 0.68,
+                'Другое (указать в комментарии)': 0.50
+            };
+
+            function calculatePrice() {
+                const material = materialSelect.value;
+                const layerHeight = parseFloat(layerHeightInput.value) || 0;
+                const infill = parseInt(infillInput.value) || 0;
+                const weight = parseFloat(weightInput.value) || 0;
+
+                if (!material || layerHeight <= 0 || infill < 0 || infill > 100 || weight <= 0) {
+                    pricePreview.textContent = '€0.00';
+                    return;
+                }
+
+                const basePrice = 3.00;
+                const ratePerGram = materialRates[material] || 0.50;
+
+                let layerCoefficient = 1.0;
+                if (layerHeight <= 0.12) {
+                    layerCoefficient = 1.35;
+                } else if (layerHeight <= 0.16) {
+                    layerCoefficient = 1.20;
+                } else if (layerHeight <= 0.20) {
+                    layerCoefficient = 1.10;
+                } else if (layerHeight <= 0.28) {
+                    layerCoefficient = 1.00;
+                } else {
+                    layerCoefficient = 0.95;
+                }
+
+                const infillCoefficient = 1.0 + (infill / 200);
+
+                const price = (basePrice + (weight * ratePerGram)) * layerCoefficient * infillCoefficient;
+
+                pricePreview.textContent = '€' + price.toFixed(2);
+            }
+
+            materialSelect.addEventListener('change', calculatePrice);
+            layerHeightInput.addEventListener('input', calculatePrice);
+            infillInput.addEventListener('input', calculatePrice);
+            weightInput.addEventListener('input', calculatePrice);
+
+            calculatePrice();
+        })();
+    </script>
 
 <?php
 require_once __DIR__ . '/includes/footer.php';

@@ -133,7 +133,7 @@ function calculateCustomOrderPrice(string $material, float $weight, float $layer
     ];
 
     $basePrice = 3.00;
-    $rate = $materialRates[$material] ?? 0.50;
+    $ratePerGram = $materialRates[$material] ?? 0.50;
 
     $layerCoefficient = 1.0;
     if ($layerHeight <= 0.12) {
@@ -142,11 +142,15 @@ function calculateCustomOrderPrice(string $material, float $weight, float $layer
         $layerCoefficient = 1.20;
     } elseif ($layerHeight <= 0.20) {
         $layerCoefficient = 1.10;
+    } elseif ($layerHeight <= 0.28) {
+        $layerCoefficient = 1.00;
+    } else {
+        $layerCoefficient = 0.95;
     }
 
     $infillCoefficient = 1.0 + ($infill / 200);
 
-    $price = ($basePrice + ($weight * $rate)) * $layerCoefficient * $infillCoefficient;
+    $price = ($basePrice + ($weight * $ratePerGram)) * $layerCoefficient * $infillCoefficient;
 
     return round($price, 2);
 }

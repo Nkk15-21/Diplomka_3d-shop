@@ -34,7 +34,14 @@ $flashError = getFlash('error');
 
             <?php if (!empty($_SESSION['user_id'])): ?>
                 <a href="profile.php">Профиль</a>
-                <a href="logout.php">Выход</a>
+                <a href="logout.php"
+                   class="danger-link"
+                   data-confirm="true"
+                   data-confirm-title="Выход из аккаунта"
+                   data-confirm-text="Вы уверены, что хотите выйти из аккаунта?"
+                   data-confirm-button="Выйти">
+                    Выход
+                </a>
             <?php else: ?>
                 <a href="login.php">Вход</a>
                 <a href="register.php">Регистрация</a>

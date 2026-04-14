@@ -1,0 +1,47 @@
+<?php
+declare(strict_types=1);
+
+require_once __DIR__ . '/../includes/db.php';
+require_once __DIR__ . '/header.php';
+
+$usersCount = (int)($mysqli->query("SELECT COUNT(*) AS cnt FROM users")->fetch_assoc()['cnt'] ?? 0);
+$productsCount = (int)($mysqli->query("SELECT COUNT(*) AS cnt FROM products")->fetch_assoc()['cnt'] ?? 0);
+$ordersCount = (int)($mysqli->query("SELECT COUNT(*) AS cnt FROM orders")->fetch_assoc()['cnt'] ?? 0);
+$customOrdersCount = (int)($mysqli->query("SELECT COUNT(*) AS cnt FROM custom_orders")->fetch_assoc()['cnt'] ?? 0);
+$contactsCount = (int)($mysqli->query("SELECT COUNT(*) AS cnt FROM contacts")->fetch_assoc()['cnt'] ?? 0);
+?>
+
+    <div class="page-header">
+        <h2>Обзор системы</h2>
+        <p>Здесь можно управлять товарами, заказами, пользователями и сообщениями.</p>
+    </div>
+
+    <div class="admin-stats">
+        <div class="admin-stat-card">
+            <div class="admin-stat-card__title">Пользователи</div>
+            <div class="admin-stat-card__value"><?= $usersCount ?></div>
+        </div>
+
+        <div class="admin-stat-card">
+            <div class="admin-stat-card__title">Товары</div>
+            <div class="admin-stat-card__value"><?= $productsCount ?></div>
+        </div>
+
+        <div class="admin-stat-card">
+            <div class="admin-stat-card__title">Заказы товаров</div>
+            <div class="admin-stat-card__value"><?= $ordersCount ?></div>
+        </div>
+
+        <div class="admin-stat-card">
+            <div class="admin-stat-card__title">Индивидуальные заказы</div>
+            <div class="admin-stat-card__value"><?= $customOrdersCount ?></div>
+        </div>
+
+        <div class="admin-stat-card">
+            <div class="admin-stat-card__title">Сообщения</div>
+            <div class="admin-stat-card__value"><?= $contactsCount ?></div>
+        </div>
+    </div>
+
+<?php
+require_once __DIR__ . '/footer.php';

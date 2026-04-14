@@ -34,6 +34,11 @@ $flashError = getFlash('error');
 
             <?php if (!empty($_SESSION['user_id'])): ?>
                 <a href="profile.php">Профиль</a>
+
+                <?php if (($_SESSION['user_role'] ?? '') === 'admin'): ?>
+                    <a href="admin/index.php">Админка</a>
+                <?php endif; ?>
+
                 <a href="logout.php"
                    class="danger-link"
                    data-confirm="true"

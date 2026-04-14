@@ -6,7 +6,6 @@
     box-sizing: border-box;
 }
 
-/* Основной стиль страницы */
 body {
     margin: 0;
     font-family: Arial, sans-serif;
@@ -14,7 +13,10 @@ body {
     color: #1f2937;
 }
 
-/* Базовый контейнер для центрирования контента */
+body.modal-open {
+    overflow: hidden;
+}
+
 .container {
     width: 100%;
     max-width: 1100px;
@@ -24,17 +26,15 @@ body {
 
 
 /* =========================================================
-   2. ШАПКА САЙТА (HEADER)
+   2. ШАПКА САЙТА
    ========================================================= */
 
-/* Общая оболочка шапки */
 .site-header {
     background: #ffffff;
     border-bottom: 1px solid #e5e7eb;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
 }
 
-/* Внутреннее выравнивание логотипа и меню */
 .header-inner {
     display: flex;
     justify-content: space-between;
@@ -43,31 +43,27 @@ body {
     flex-wrap: wrap;
 }
 
-/* Логотип / название сайта */
 .logo {
     font-size: 24px;
-    font-weight: bold;
+    font-weight: 700;
     text-decoration: none;
     color: #111827;
 }
 
-/* Контейнер навигации */
 .nav {
     display: flex;
     flex-wrap: wrap;
     gap: 12px;
 }
 
-/* Ссылки в меню */
 .nav a {
     text-decoration: none;
     color: #374151;
     padding: 8px 12px;
     border-radius: 10px;
-    transition: 0.2s;
+    transition: background 0.2s ease, color 0.2s ease;
 }
 
-/* Эффект при наведении на ссылки меню */
 .nav a:hover {
     background: #eef2ff;
     color: #1d4ed8;
@@ -75,10 +71,9 @@ body {
 
 
 /* =========================================================
-   3. HERO-БЛОК НА ГЛАВНОЙ СТРАНИЦЕ
+   3. HERO-БЛОК
    ========================================================= */
 
-/* Большой приветственный блок */
 .hero {
     background: linear-gradient(135deg, #ffffff, #eef4ff);
     border-radius: 20px;
@@ -87,19 +82,19 @@ body {
     box-shadow: 0 10px 28px rgba(0, 0, 0, 0.05);
 }
 
-/* Заголовок hero-блока */
 .hero h1 {
     margin-top: 0;
+    margin-bottom: 14px;
     font-size: 40px;
 }
 
-/* Текст внутри hero-блока */
 .hero p {
+    margin: 0;
     font-size: 18px;
+    line-height: 1.6;
     color: #4b5563;
 }
 
-/* Кнопки внутри hero-блока */
 .hero-actions {
     display: flex;
     gap: 12px;
@@ -109,17 +104,15 @@ body {
 
 
 /* =========================================================
-   4. СЕТКИ И КАРТОЧКИ
+   4. КАРТОЧКИ И СЕТКИ
    ========================================================= */
 
-/* Сетка из 3 колонок, адаптивная */
 .grid-3 {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
     gap: 20px;
 }
 
-/* Базовый стиль карточек */
 .card,
 .product-card,
 .info-card {
@@ -129,60 +122,54 @@ body {
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05);
 }
 
-/* Заголовки карточек */
 .card h3,
 .product-card h3,
 .info-card h3 {
     margin-top: 0;
 }
 
-/* Сетка карточек товаров */
 .product-list {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
     gap: 20px;
 }
 
-/* Цена внутри карточки товара */
 .product-card .price {
-    font-size: 22px;
-    font-weight: bold;
-    color: #1d4ed8;
     margin: 12px 0;
+    font-size: 22px;
+    font-weight: 700;
+    color: #1d4ed8;
 }
 
 
 /* =========================================================
-   5. СООБЩЕНИЯ И УВЕДОМЛЕНИЯ
+   5. СООБЩЕНИЯ
    ========================================================= */
 
-/* Общий стиль сообщения */
 .message {
     padding: 14px 18px;
     border-radius: 12px;
     margin-bottom: 20px;
     font-weight: 500;
+    border: 1px solid transparent;
 }
 
-/* Успешное сообщение */
 .message.success {
     background: #ecfdf5;
     color: #065f46;
-    border: 1px solid #a7f3d0;
+    border-color: #a7f3d0;
 }
 
-/* Сообщение об ошибке */
 .message.error {
     background: #fef2f2;
     color: #991b1b;
-    border: 1px solid #fecaca;
+    border-color: #fecaca;
 }
 
-/* Информационное сообщение */
 .message.info {
     background: #eff6ff;
     color: #1e40af;
-    border: 1px solid #bfdbfe;
+    border-color: #bfdbfe;
 }
 
 
@@ -190,7 +177,6 @@ body {
    6. ФОРМЫ
    ========================================================= */
 
-/* Общий стиль формы */
 form {
     background: #ffffff;
     padding: 24px;
@@ -198,14 +184,12 @@ form {
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05);
 }
 
-/* Подписи к полям */
 label {
     display: block;
     margin-bottom: 6px;
     font-weight: 600;
 }
 
-/* Поля ввода, select и textarea */
 input,
 textarea,
 select {
@@ -215,13 +199,21 @@ select {
     border: 1px solid #d1d5db;
     border-radius: 12px;
     font-size: 15px;
-    background: #fff;
+    background: #ffffff;
+    color: #111827;
 }
 
-/* Поле многострочного текста */
 textarea {
     min-height: 120px;
     resize: vertical;
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+    outline: none;
+    border-color: #93c5fd;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
 }
 
 
@@ -229,7 +221,6 @@ textarea {
    7. КНОПКИ
    ========================================================= */
 
-/* Базовый стиль кнопок и кнопок-ссылок */
 button,
 .btn {
     display: inline-block;
@@ -242,15 +233,14 @@ button,
     cursor: pointer;
     font-size: 15px;
     font-weight: 600;
+    transition: background 0.2s ease, transform 0.2s ease;
 }
 
-/* Эффект при наведении */
 button:hover,
 .btn:hover {
     background: #1d4ed8;
 }
 
-/* Вторичная кнопка */
 .btn-secondary {
     background: #6b7280;
 }
@@ -259,48 +249,44 @@ button:hover,
     background: #4b5563;
 }
 
-/* Опасная кнопка */
 .btn-danger {
     background: #dc2626;
 }
 
 .btn-danger:hover {
     background: #b91c1c;
+    transform: translateY(-1px);
 }
 
 
 /* =========================================================
-   8. ЗАГОЛОВКИ СЕКЦИЙ И ОБЩИЕ ВСПОМОГАТЕЛЬНЫЕ СТИЛИ
+   8. ОБЩИЕ ВСПОМОГАТЕЛЬНЫЕ ЭЛЕМЕНТЫ
    ========================================================= */
 
-/* Заголовок секции */
 .section-title {
     margin-top: 0;
     margin-bottom: 20px;
 }
 
-/* Верхняя часть страницы перед основным контентом */
 .page-header {
     margin-bottom: 25px;
 }
 
-/* Заголовок в page-header */
-.page-header h1 {
+.page-header h1,
+.page-header h2 {
+    margin-top: 0;
     margin-bottom: 10px;
 }
 
-/* Маленький серый текст */
 .small-text {
     color: #6b7280;
     font-size: 14px;
 }
 
-/* Красивый список */
 ul.clean-list {
     padding-left: 20px;
 }
 
-/* Бейдж / плашка */
 .badge {
     display: inline-block;
     padding: 6px 10px;
@@ -316,7 +302,6 @@ ul.clean-list {
    9. ТАБЛИЦЫ
    ========================================================= */
 
-/* Общий стиль таблицы */
 table {
     width: 100%;
     border-collapse: collapse;
@@ -327,25 +312,24 @@ table {
     margin-bottom: 25px;
 }
 
-/* Ячейки таблицы */
 table th,
 table td {
     padding: 14px;
     border-bottom: 1px solid #e5e7eb;
     text-align: left;
+    vertical-align: middle;
 }
 
-/* Заголовки колонок */
 table th {
     background: #f9fafb;
+    font-weight: 700;
 }
 
 
 /* =========================================================
-   10. ПОДВАЛ САЙТА (FOOTER)
+   10. ПОДВАЛ САЙТА
    ========================================================= */
 
-/* Общий стиль footer */
 .site-footer {
     margin-top: 40px;
     background: #ffffff;
@@ -360,23 +344,15 @@ table th {
    11. МОДАЛЬНОЕ ОКНО ПОДТВЕРЖДЕНИЯ
    ========================================================= */
 
-/* Блокировка прокрутки фона при открытой модалке */
-body.modal-open {
-    overflow: hidden;
-}
-
-/* Опасная ссылка, например "Выход" */
 .danger-link {
     color: #b91c1c !important;
 }
 
-/* Hover для опасной ссылки */
 .danger-link:hover {
     background: #fef2f2 !important;
     color: #991b1b !important;
 }
 
-/* Затемнение фона */
 .modal-overlay {
     position: fixed;
     inset: 0;
@@ -393,14 +369,12 @@ body.modal-open {
     backdrop-filter: blur(4px);
 }
 
-/* Активное состояние модалки */
 .modal-overlay.active {
     opacity: 1;
     visibility: visible;
     pointer-events: auto;
 }
 
-/* Само окно модалки */
 .confirm-modal {
     width: 100%;
     max-width: 420px;
@@ -413,12 +387,10 @@ body.modal-open {
     transition: 0.25s ease;
 }
 
-/* Анимация появления */
 .modal-overlay.active .confirm-modal {
     transform: translateY(0) scale(1);
 }
 
-/* Иконка внутри модалки */
 .confirm-modal__icon {
     width: 64px;
     height: 64px;
@@ -434,14 +406,12 @@ body.modal-open {
     box-shadow: 0 10px 24px rgba(220, 38, 38, 0.15);
 }
 
-/* Заголовок модалки */
 .confirm-modal__title {
     margin: 0 0 10px;
     font-size: 24px;
     color: #111827;
 }
 
-/* Текст модалки */
 .confirm-modal__text {
     margin: 0 0 24px;
     font-size: 16px;
@@ -449,7 +419,6 @@ body.modal-open {
     color: #4b5563;
 }
 
-/* Контейнер кнопок модалки */
 .confirm-modal__actions {
     display: flex;
     gap: 12px;
@@ -457,7 +426,6 @@ body.modal-open {
     flex-wrap: wrap;
 }
 
-/* Кнопки внутри модалки */
 .confirm-modal__actions .btn {
     min-width: 130px;
     text-align: center;
@@ -468,7 +436,6 @@ body.modal-open {
    12. КАЛЬКУЛЯТОР ПРИМЕРНОЙ СТОИМОСТИ
    ========================================================= */
 
-/* Основной блок калькулятора */
 .calculator-box {
     background: linear-gradient(135deg, #ffffff, #eef4ff);
     border-radius: 18px;
@@ -478,13 +445,11 @@ body.modal-open {
     border: 1px solid #dbeafe;
 }
 
-/* Заголовок калькулятора */
 .calculator-box h2 {
     margin-top: 0;
     margin-bottom: 10px;
 }
 
-/* Итоговая цена в калькуляторе */
 .calculator-price {
     margin-top: 18px;
     font-size: 36px;
@@ -494,21 +459,7 @@ body.modal-open {
 
 
 /* =========================================================
-   13. АДАПТИВНОСТЬ
-   ========================================================= */
-
-@media (max-width: 768px) {
-    .hero {
-        padding: 25px;
-    }
-
-    .hero h1 {
-        font-size: 30px;
-    }
-}
-
-/* =========================================================
-   СТАТУСЫ ЗАКАЗОВ
+   13. СТАТУСЫ ЗАКАЗОВ
    ========================================================= */
 
 .badge-new {
@@ -529,4 +480,207 @@ body.modal-open {
 .badge-cancelled {
     background: #fee2e2;
     color: #991b1b;
+}
+
+
+/* =========================================================
+   14. АДМИНКА
+   ========================================================= */
+
+.admin-layout {
+    display: flex;
+    min-height: 100vh;
+}
+
+.admin-sidebar {
+    width: 260px;
+    background: #0f172a;
+    color: #ffffff;
+    padding: 24px 18px;
+    flex-shrink: 0;
+}
+
+.admin-sidebar__logo {
+    margin-bottom: 24px;
+}
+
+.admin-sidebar__logo a {
+    color: #ffffff;
+    text-decoration: none;
+    font-size: 24px;
+    font-weight: 700;
+}
+
+.admin-sidebar__nav {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.admin-sidebar__nav a {
+    color: #d1d5db;
+    text-decoration: none;
+    padding: 10px 12px;
+    border-radius: 10px;
+    transition: background 0.2s ease, color 0.2s ease;
+}
+
+.admin-sidebar__nav a:hover {
+    background: #1e293b;
+    color: #ffffff;
+}
+
+.admin-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.admin-topbar {
+    background: #ffffff;
+    border-bottom: 1px solid #e5e7eb;
+    padding: 20px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+}
+
+.admin-topbar h1 {
+    margin: 0;
+    font-size: 26px;
+}
+
+.admin-topbar__user {
+    color: #4b5563;
+    font-weight: 600;
+}
+
+.admin-main {
+    padding: 24px;
+}
+
+.admin-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 20px;
+}
+
+.admin-stat-card {
+    background: #ffffff;
+    border-radius: 18px;
+    padding: 22px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05);
+}
+
+.admin-stat-card__title {
+    color: #6b7280;
+    font-size: 15px;
+    margin-bottom: 12px;
+}
+
+.admin-stat-card__value {
+    font-size: 34px;
+    font-weight: 700;
+    color: #111827;
+}
+
+.admin-inline-form {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    background: transparent;
+    padding: 0;
+    box-shadow: none;
+    border-radius: 0;
+    margin: 0;
+}
+
+.admin-inline-form select {
+    margin-bottom: 0;
+    min-width: 140px;
+}
+
+.admin-comment-preview {
+    max-width: 240px;
+    color: #374151;
+    white-space: normal;
+    word-break: break-word;
+    line-height: 1.45;
+}
+
+.admin-message-box {
+    max-width: 320px;
+    white-space: normal;
+    word-break: break-word;
+    line-height: 1.5;
+    color: #374151;
+}
+
+
+/* =========================================================
+   15. ДЕЙСТВИЯ В АДМИНКЕ
+   ========================================================= */
+
+.action-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: 8px;
+    font-size: 16px;
+    text-decoration: none;
+    opacity: 0.7;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.action-icon:hover {
+    opacity: 1;
+    transform: scale(1.12);
+}
+
+.action-icon.edit {
+    color: #2563eb;
+}
+
+.action-icon.delete {
+    color: #dc2626;
+}
+
+
+/* =========================================================
+   16. АДАПТИВНОСТЬ
+   ========================================================= */
+
+@media (max-width: 900px) {
+    .admin-layout {
+        flex-direction: column;
+    }
+
+    .admin-sidebar {
+        width: 100%;
+    }
+
+    .admin-topbar {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}
+
+@media (max-width: 768px) {
+    .hero {
+        padding: 25px;
+    }
+
+    .hero h1 {
+        font-size: 30px;
+    }
+
+    .container {
+        padding: 16px;
+    }
+
+    .admin-main {
+        padding: 16px;
+    }
 }

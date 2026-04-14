@@ -6,118 +6,173 @@ requireLogin();
 
 $userId = (int)$_SESSION['user_id'];
 
-$stmt = $mysqli->prepare("SELECT id, name, email, phone, role, created_at FROM users WHERE id = ? LIMIT 1");
+/*
+|--------------------------------------------------------------------------
+| Получаем пользователя
+|--------------------------------------------------------------------------
+*/
+$stmt = $mysqli->prepare("
+    SELECT name, email, phone, created_at
+    FROM users
+    WHERE id = ?
+    LIMIT 1
+");
 $stmt->bind_param('i', $userId);
 $stmt->execute();
 $user = $stmt->get_result()->fetch_assoc();
 $stmt->close();
 
+/*
+|--------------------------------------------------------------------------
+| Получаем заказы (обычные)
+|--------------------------------------------------------------------------
+*/
 $stmt = $mysqli->prepare("
-    SELECT 
-        o.id AS order_id,
-        o.total_amount,
-        o.status,
-        o.created_at,
-        p.name AS product_name,
-        oi.quantity,
-        oi.unit_price
-    FROM orders o
-    INNER JOIN order_items oi ON oi.order_id = o.id
-    INNER JOIN products p ON p.id = oi.product_id
-    WHERE o.user_id = ?
-    ORDER BY o.created_at DESC, o.id DESC
+    SELECT *
+    FROM orders
+    WHERE user_id = ?
+    ORDER BY created_at DESC
 ");
 $stmt->bind_param('i', $userId);
 $stmt->execute();
-$ordersResult = $stmt->get_result();
+$orders = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
 $stmt->close();
 
+/*
+|--------------------------------------------------------------------------
+| Получаем индивидуальные заказы
+|--------------------------------------------------------------------------
+*/
 $stmt = $mysqli->prepare("
-    SELECT id, material, color, layer_height, infill, estimated_price, status, model_file, comment, created_at
+    SELECT *
     FROM custom_orders
     WHERE user_id = ?
-    ORDER BY created_at DESC, id DESC
+    ORDER BY created_at DESC
 ");
 $stmt->bind_param('i', $userId);
 $stmt->execute();
-$customOrdersResult = $stmt->get_result();
+$customOrders = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
 $stmt->close();
+
+/*
+|--------------------------------------------------------------------------
+| Функция для статусов
+|--------------------------------------------------------------------------
+*/
+function getStatusBadge(string $status): string {
+    return match ($status) {
+        'new' => 'badge badge-new',
+        'processing' => 'badge badge-processing',
+        'done' => 'badge badge-done',
+        'cancelled' => 'badge badge-cancelled',
+        default => 'badge'
+    };
+}
 
 require_once __DIR__ . '/includes/header.php';
 ?>
 
     <div class="page-header">
         <h1>Личный кабинет</h1>
-        <p>Добро пожаловать, <?= e($user['name'] ?? $_SESSION['user_name']) ?>.</p>
     </div>
 
-    <div class="card" style="margin-bottom: 25px;">
-        <h2>Данные аккаунта</h2>
-        <p><strong>Имя:</strong> <?= e($user['name'] ?? '') ?></p>
-        <p><strong>E-mail:</strong> <?= e($user['email'] ?? '') ?></p>
-        <p><strong>Телефон:</strong> <?= e($user['phone'] ?? '') ?></p>
-        <p><strong>Роль:</strong> <?= e($user['role'] ?? '') ?></p>
-        <p><strong>Дата регистрации:</strong> <?= e($user['created_at'] ?? '') ?></p>
+    <div class="card">
+        <h3>Ваши данные</h3>
+        <p><strong>Имя:</strong> <?= e($user['name']) ?></p>
+        <p><strong>Email:</strong> <?= e($user['email']) ?></p>
+        <p><strong>Телефон:</strong> <?= e($user['phone'] ?? '—') ?></p>
+        <p><strong>Дата регистрации:</strong> <?= e($user['created_at']) ?></p>
     </div>
 
-    <h2>Заказы товаров</h2>
-<?php if ($ordersResult && $ordersResult->num_rows > 0): ?>
-    <table>
-        <tr>
-            <th>ID заказа</th>
-            <th>Товар</th>
-            <th>Количество</th>
-            <th>Цена за единицу</th>
-            <th>Сумма</th>
-            <th>Статус</th>
-            <th>Дата</th>
-        </tr>
-        <?php while ($order = $ordersResult->fetch_assoc()): ?>
-            <tr>
-                <td><?= (int)$order['order_id'] ?></td>
-                <td><?= e($order['product_name']) ?></td>
-                <td><?= (int)$order['quantity'] ?></td>
-                <td>€<?= number_format((float)$order['unit_price'], 2) ?></td>
-                <td>€<?= number_format((float)$order['total_amount'], 2) ?></td>
-                <td><?= e($order['status']) ?></td>
-                <td><?= e($order['created_at']) ?></td>
-            </tr>
-        <?php endwhile; ?>
-    </table>
+    <br>
+
+    <!-- ===================== ЗАКАЗЫ ===================== -->
+
+    <h2 class="section-title">Ваши заказы</h2>
+
+<?php if (!$orders): ?>
+    <div class="message info">У вас пока нет заказов.</div>
 <?php else: ?>
-    <div class="message info">У вас пока нет заказов готовых товаров.</div>
+    <?php foreach ($orders as $order): ?>
+
+        <div class="card" style="margin-bottom: 20px;">
+            <p>
+                <strong>Заказ #<?= $order['id'] ?></strong>
+                — <span class="<?= getStatusBadge($order['status']) ?>">
+                    <?= e($order['status']) ?>
+                </span>
+            </p>
+
+            <p><strong>Дата:</strong> <?= e($order['created_at']) ?></p>
+            <p><strong>Сумма:</strong> €<?= number_format((float)$order['total_amount'], 2) ?></p>
+
+            <h4>Товары:</h4>
+
+            <ul class="clean-list">
+                <?php
+                $stmt = $mysqli->prepare("
+                    SELECT oi.quantity, oi.unit_price, p.name
+                    FROM order_items oi
+                    JOIN products p ON p.id = oi.product_id
+                    WHERE oi.order_id = ?
+                ");
+                $stmt->bind_param('i', $order['id']);
+                $stmt->execute();
+                $items = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+                $stmt->close();
+                ?>
+
+                <?php foreach ($items as $item): ?>
+                    <li>
+                        <?= e($item['name']) ?> —
+                        <?= $item['quantity'] ?> шт.
+                        × €<?= number_format((float)$item['unit_price'], 2) ?>
+                    </li>
+                <?php endforeach; ?>
+            </ul>
+        </div>
+
+    <?php endforeach; ?>
 <?php endif; ?>
 
-    <h2>Индивидуальные заказы</h2>
-<?php if ($customOrdersResult && $customOrdersResult->num_rows > 0): ?>
-    <table>
-        <tr>
-            <th>ID</th>
-            <th>Материал</th>
-            <th>Цвет</th>
-            <th>Высота слоя</th>
-            <th>Заполнение</th>
-            <th>Оценка цены</th>
-            <th>Статус</th>
-            <th>Файл</th>
-            <th>Дата</th>
-        </tr>
-        <?php while ($customOrder = $customOrdersResult->fetch_assoc()): ?>
-            <tr>
-                <td><?= (int)$customOrder['id'] ?></td>
-                <td><?= e($customOrder['material']) ?></td>
-                <td><?= e($customOrder['color']) ?></td>
-                <td><?= e((string)$customOrder['layer_height']) ?></td>
-                <td><?= e((string)$customOrder['infill']) ?>%</td>
-                <td>€<?= number_format((float)$customOrder['estimated_price'], 2) ?></td>
-                <td><?= e($customOrder['status']) ?></td>
-                <td><?= e(basename($customOrder['model_file'])) ?></td>
-                <td><?= e($customOrder['created_at']) ?></td>
-            </tr>
-        <?php endwhile; ?>
-    </table>
+    <!-- ===================== ИНДИВИДУАЛЬНЫЕ ЗАКАЗЫ ===================== -->
+
+    <h2 class="section-title">Индивидуальные заказы</h2>
+
+<?php if (!$customOrders): ?>
+    <div class="message info">Вы ещё не отправляли индивидуальные заказы.</div>
 <?php else: ?>
-    <div class="message info">У вас пока нет индивидуальных заказов.</div>
+    <?php foreach ($customOrders as $order): ?>
+
+        <div class="card" style="margin-bottom: 20px;">
+            <p>
+                <strong>Заказ #<?= $order['id'] ?></strong>
+                — <span class="<?= getStatusBadge($order['status']) ?>">
+                    <?= e($order['status']) ?>
+                </span>
+            </p>
+
+            <p><strong>Материал:</strong> <?= e($order['material']) ?></p>
+            <p><strong>Цвет:</strong> <?= e($order['color'] ?? '—') ?></p>
+            <p><strong>Слой:</strong> <?= e($order['layer_height']) ?> мм</p>
+            <p><strong>Заполнение:</strong> <?= e($order['infill']) ?>%</p>
+
+            <?php if ($order['estimated_price'] !== null): ?>
+                <p><strong>Оценка цены:</strong> €<?= number_format((float)$order['estimated_price'], 2) ?></p>
+            <?php endif; ?>
+
+            <p><strong>Файл:</strong>
+                <a href="<?= e($order['model_file']) ?>" target="_blank">Скачать</a>
+            </p>
+
+            <p><strong>Дата:</strong> <?= e($order['created_at']) ?></p>
+
+            <?php if (!empty($order['comment'])): ?>
+                <p><strong>Комментарий:</strong><br><?= nl2br(e($order['comment'])) ?></p>
+            <?php endif; ?>
+        </div>
+
+    <?php endforeach; ?>
 <?php endif; ?>
 
 <?php

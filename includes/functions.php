@@ -5,22 +5,49 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-function e(string|null $value): string
+/* =========================================================
+   ЭКРАНИРОВАНИЕ ВЫВОДА
+   ========================================================= */
+
+/**
+ * Безопасный вывод текста в HTML.
+ * Поддерживает строки, числа и null.
+ */
+function e(string|int|float|null $value): string
 {
     return htmlspecialchars((string)$value, ENT_QUOTES, 'UTF-8');
 }
 
+
+/* =========================================================
+   РЕДИРЕКТЫ
+   ========================================================= */
+
+/**
+ * Перенаправление на другую страницу.
+ */
 function redirect(string $url): void
 {
     header('Location: ' . $url);
     exit;
 }
 
+
+/* =========================================================
+   FLASH-СООБЩЕНИЯ
+   ========================================================= */
+
+/**
+ * Сохраняет flash-сообщение в сессии.
+ */
 function setFlash(string $type, string $message): void
 {
     $_SESSION['flash_' . $type] = $message;
 }
 
+/**
+ * Получает и удаляет flash-сообщение из сессии.
+ */
 function getFlash(string $type): ?string
 {
     $key = 'flash_' . $type;
@@ -35,11 +62,23 @@ function getFlash(string $type): ?string
     return $message;
 }
 
+
+/* =========================================================
+   АВТОРИЗАЦИЯ
+   ========================================================= */
+
+/**
+ * Проверяет, вошёл ли пользователь в аккаунт.
+ */
 function isLoggedIn(): bool
 {
     return !empty($_SESSION['user_id']);
 }
 
+/**
+ * Требует вход в аккаунт.
+ * Если пользователь не вошёл, отправляет на login.php.
+ */
 function requireLogin(): void
 {
     if (!isLoggedIn()) {
@@ -48,11 +87,25 @@ function requireLogin(): void
     }
 }
 
+
+/* =========================================================
+   ВАЛИДАЦИЯ ПОЛЕЙ
+   ========================================================= */
+
+/**
+ * Проверка имени.
+ * Разрешены буквы, пробелы и дефисы.
+ */
 function isValidName(string $name): bool
 {
     return (bool)preg_match('/^[\p{L}\s\-]{2,100}$/u', $name);
 }
 
+/**
+ * Проверка телефона.
+ * Разрешены цифры, пробелы, + и -.
+ * Пустое значение тоже допустимо.
+ */
 function isValidPhone(string $phone): bool
 {
     if ($phone === '') {
@@ -62,11 +115,28 @@ function isValidPhone(string $phone): bool
     return (bool)preg_match('/^[0-9+\-\s]{5,50}$/', $phone);
 }
 
+
+/* =========================================================
+   СТАРЫЕ ДАННЫЕ ФОРМЫ
+   ========================================================= */
+
+/**
+ * Возвращает старое значение из POST,
+ * чтобы форма не очищалась после ошибки.
+ */
 function old(string $key, string $default = ''): string
 {
     return isset($_POST[$key]) ? trim((string)$_POST[$key]) : $default;
 }
 
+
+/* =========================================================
+   СПИСОК МАТЕРИАЛОВ ДЛЯ 3D-ПЕЧАТИ
+   ========================================================= */
+
+/**
+ * Возвращает список доступных материалов.
+ */
 function getMaterialsList(): array
 {
     return [
@@ -100,6 +170,14 @@ function getMaterialsList(): array
     ];
 }
 
+
+/* =========================================================
+   КАЛЬКУЛЯТОР ПРИМЕРНОЙ СТОИМОСТИ
+   ========================================================= */
+
+/**
+ * Считает примерную стоимость индивидуального заказа.
+ */
 function calculateCustomOrderPrice(string $material, float $weight, float $layerHeight, int $infill): float
 {
     $materialRates = [
@@ -136,6 +214,7 @@ function calculateCustomOrderPrice(string $material, float $weight, float $layer
     $ratePerGram = $materialRates[$material] ?? 0.50;
 
     $layerCoefficient = 1.0;
+
     if ($layerHeight <= 0.12) {
         $layerCoefficient = 1.35;
     } elseif ($layerHeight <= 0.16) {

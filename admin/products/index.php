@@ -5,10 +5,6 @@ require_once __DIR__ . '/../../includes/functions.php';
 require_once __DIR__ . '/../../includes/db.php';
 require_once __DIR__ . '/../header.php';
 
-/* =========================================================
-   ПОЛУЧЕНИЕ ТОВАРОВ
-   ========================================================= */
-
 $result = $mysqli->query("
     SELECT
         p.id,
@@ -26,22 +22,22 @@ $result = $mysqli->query("
 ?>
 
     <div class="page-header">
-        <h2>Товары</h2>
-        <p>Здесь можно добавлять, редактировать и удалять товары магазина.</p>
-        <a href="create.php" class="btn">+ Добавить товар</a>
+        <h2><?= e(t('admin.products.title')) ?></h2>
+        <p><?= e(t('admin.products.subtitle')) ?></p>
+        <a href="/3d_print_shop/admin/products/create.php" class="btn"><?= e(t('admin.products.add')) ?></a>
     </div>
 
 <?php if ($result && $result->num_rows > 0): ?>
     <table>
         <tr>
             <th>ID</th>
-            <th>Изображение</th>
-            <th>Название</th>
-            <th>Категория</th>
-            <th>Цена</th>
-            <th>Статус</th>
-            <th>Дата</th>
-            <th>Действия</th>
+            <th><?= e(t('common.file')) ?></th>
+            <th><?= e(t('common.name')) ?></th>
+            <th><?= e(t('common.category')) ?></th>
+            <th><?= e(t('common.price')) ?></th>
+            <th><?= e(t('common.status')) ?></th>
+            <th><?= e(t('common.created_at')) ?></th>
+            <th><?= e(t('common.actions')) ?></th>
         </tr>
 
         <?php while ($product = $result->fetch_assoc()): ?>
@@ -56,24 +52,24 @@ $result = $mysqli->query("
                                 style="width: 60px; height: 60px; object-fit: cover; border-radius: 10px;"
                         >
                     <?php else: ?>
-                        <span class="small-text">Нет фото</span>
+                        <span class="small-text"><?= e(t('admin.products.no_image')) ?></span>
                     <?php endif; ?>
                 </td>
 
                 <td>
                     <strong><?= e($product['name']) ?></strong><br>
-                    <span class="small-text"><?= e($product['short_description'] ?: 'Без краткого описания') ?></span>
+                    <span class="small-text"><?= e($product['short_description'] ?: t('common.none')) ?></span>
                 </td>
 
-                <td><?= e($product['category_name'] ?: 'Без категории') ?></td>
+                <td><?= e($product['category_name'] ?: t('common.none')) ?></td>
 
                 <td>€<?= number_format((float)$product['price'], 2) ?></td>
 
                 <td>
                     <?php if ((int)$product['is_active'] === 1): ?>
-                        <span class="badge badge-done">Активен</span>
+                        <span class="badge badge-done"><?= e(t('admin.products.active_label_short')) ?></span>
                     <?php else: ?>
-                        <span class="badge badge-cancelled">Скрыт</span>
+                        <span class="badge badge-cancelled"><?= e(t('admin.products.hidden_label')) ?></span>
                     <?php endif; ?>
                 </td>
 
@@ -81,21 +77,21 @@ $result = $mysqli->query("
 
                 <td>
                     <a
-                            href="edit.php?id=<?= (int)$product['id'] ?>"
+                            href="/3d_print_shop/admin/products/edit.php?id=<?= (int)$product['id'] ?>"
                             class="action-icon edit"
-                            title="Редактировать"
+                            title="<?= e(t('common.edit')) ?>"
                     >
                         ✏️
                     </a>
 
                     <a
-                            href="delete.php?id=<?= (int)$product['id'] ?>"
+                            href="/3d_print_shop/admin/products/delete.php?id=<?= (int)$product['id'] ?>"
                             class="action-icon delete"
-                            title="Удалить"
+                            title="<?= e(t('common.delete')) ?>"
                             data-confirm="true"
-                            data-confirm-title="Удаление товара"
-                            data-confirm-text="Вы уверены, что хотите удалить товар «<?= e($product['name']) ?>»?"
-                            data-confirm-button="Удалить"
+                            data-confirm-title="<?= e(t('common.delete')) ?>"
+                            data-confirm-text="<?= e(t('admin.products.delete_confirm')) ?>"
+                            data-confirm-button="<?= e(t('common.delete')) ?>"
                     >
                         🗑️
                     </a>
@@ -104,7 +100,7 @@ $result = $mysqli->query("
         <?php endwhile; ?>
     </table>
 <?php else: ?>
-    <div class="message info">Товаров пока нет.</div>
+    <div class="message info"><?= e(t('admin.products.empty')) ?></div>
 <?php endif; ?>
 
 <?php require_once __DIR__ . '/../footer.php'; ?>

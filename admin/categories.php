@@ -7,10 +7,6 @@ require_once __DIR__ . '/header.php';
 
 $errors = [];
 
-/* =========================================================
-   ДОБАВЛЕНИЕ КАТЕГОРИИ
-   ========================================================= */
-
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $action = trim((string)($_POST['action'] ?? ''));
 
@@ -19,7 +15,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $description = trim((string)($_POST['description'] ?? ''));
 
         if ($name === '') {
-            $errors[] = 'Введите название категории.';
+            $errors[] = t('admin.categories.name_error');
         }
 
         if (!$errors) {
@@ -31,24 +27,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt->execute();
             $stmt->close();
 
-            setFlash('success', 'Категория успешно добавлена.');
-            redirect('categories.php');
+            setFlash('success', t('admin.categories.create_success'));
+            redirect('/3d_print_shop/admin/categories.php');
         }
     }
-
-    /* =========================================================
-       УДАЛЕНИЕ КАТЕГОРИИ
-       ========================================================= */
 
     if ($action === 'delete') {
         $categoryId = isset($_POST['category_id']) ? (int)$_POST['category_id'] : 0;
 
         if ($categoryId <= 0) {
-            setFlash('error', 'Некорректная категория для удаления.');
-            redirect('categories.php');
+            setFlash('error', t('admin.categories.delete_error'));
+            redirect('/3d_print_shop/admin/categories.php');
         }
 
-        /* Проверяем, существует ли категория */
         $stmt = $mysqli->prepare("
             SELECT id, name
             FROM categories
@@ -61,11 +52,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt->close();
 
         if (!$category) {
-            setFlash('error', 'Категория не найдена.');
-            redirect('categories.php');
+            setFlash('error', t('admin.categories.not_found'));
+            redirect('/3d_print_shop/admin/categories.php');
         }
 
-        /* Проверяем, есть ли товары в этой категории */
         $stmt = $mysqli->prepare("
             SELECT COUNT(*) AS cnt
             FROM products
@@ -77,14 +67,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt->close();
 
         if ($productsCount > 0) {
-            setFlash(
-                'error',
-                'Эту категорию нельзя удалить, потому что к ней привязаны товары (' . $productsCount . ').'
-            );
-            redirect('categories.php');
+            setFlash('error', t('admin.categories.products_error') . ' (' . $productsCount . ')');
+            redirect('/3d_print_shop/admin/categories.php');
         }
 
-        /* Удаляем категорию */
         $stmt = $mysqli->prepare("
             DELETE FROM categories
             WHERE id = ?
@@ -93,14 +79,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt->execute();
         $stmt->close();
 
-        setFlash('success', 'Категория успешно удалена.');
-        redirect('categories.php');
+        setFlash('success', t('admin.categories.delete_success'));
+        redirect('/3d_print_shop/admin/categories.php');
     }
 }
-
-/* =========================================================
-   ПОЛУЧЕНИЕ КАТЕГОРИЙ
-   ========================================================= */
 
 $result = $mysqli->query("
     SELECT
@@ -117,8 +99,8 @@ $result = $mysqli->query("
 ?>
 
     <div class="page-header">
-        <h2>Категории</h2>
-        <p>Здесь можно добавлять и удалять категории товаров.</p>
+        <h2><?= e(t('admin.categories.title')) ?></h2>
+        <p><?= e(t('admin.categories.subtitle')) ?></p>
     </div>
 
 <?php if (!empty($errors)): ?>
@@ -130,18 +112,18 @@ $result = $mysqli->query("
 <?php endif; ?>
 
     <div class="card" style="margin-bottom: 24px;">
-        <h3>Добавить категорию</h3>
+        <h3><?= e(t('admin.categories.add')) ?></h3>
 
         <form method="post">
             <input type="hidden" name="action" value="create">
 
-            <label for="name">Название</label>
+            <label for="name"><?= e(t('common.name')) ?></label>
             <input type="text" id="name" name="name" required>
 
-            <label for="description">Описание</label>
+            <label for="description"><?= e(t('common.description')) ?></label>
             <textarea id="description" name="description"></textarea>
 
-            <button type="submit">Добавить категорию</button>
+            <button type="submit"><?= e(t('common.add')) ?></button>
         </form>
     </div>
 
@@ -149,37 +131,37 @@ $result = $mysqli->query("
     <table>
         <tr>
             <th>ID</th>
-            <th>Название</th>
-            <th>Описание</th>
-            <th>Товаров</th>
-            <th>Дата создания</th>
-            <th>Действие</th>
+            <th><?= e(t('common.name')) ?></th>
+            <th><?= e(t('common.description')) ?></th>
+            <th><?= e(t('admin.categories.products_count')) ?></th>
+            <th><?= e(t('common.created_at')) ?></th>
+            <th><?= e(t('common.actions')) ?></th>
         </tr>
 
         <?php while ($category = $result->fetch_assoc()): ?>
             <tr>
                 <td><?= (int)$category['id'] ?></td>
                 <td><?= e($category['name']) ?></td>
-                <td><?= e($category['description'] ?: '—') ?></td>
+                <td><?= e($category['description'] ?: t('common.none')) ?></td>
                 <td><?= (int)$category['products_count'] ?></td>
                 <td><?= e($category['created_at']) ?></td>
                 <td>
                     <?php if ((int)$category['products_count'] > 0): ?>
-                        <span class="small-text">Нельзя удалить</span>
+                        <span class="small-text"><?= e(t('admin.categories.cannot_delete')) ?></span>
                     <?php else: ?>
                         <form method="post" class="admin-inline-form">
                             <input type="hidden" name="action" value="delete">
                             <input type="hidden" name="category_id" value="<?= (int)$category['id'] ?>">
 
                             <button
-                                type="button"
-                                class="btn btn-danger"
-                                data-confirm="true"
-                                data-confirm-title="Удаление категории"
-                                data-confirm-text="Вы уверены, что хотите удалить категорию «<?= e($category['name']) ?>»?"
-                                data-confirm-button="Удалить"
+                                    type="button"
+                                    class="btn btn-danger"
+                                    data-confirm="true"
+                                    data-confirm-title="<?= e(t('common.delete')) ?>"
+                                    data-confirm-text="<?= e(t('admin.categories.delete_confirm')) ?>"
+                                    data-confirm-button="<?= e(t('common.delete')) ?>"
                             >
-                                Удалить
+                                <?= e(t('common.delete')) ?>
                             </button>
                         </form>
                     <?php endif; ?>
@@ -188,7 +170,7 @@ $result = $mysqli->query("
         <?php endwhile; ?>
     </table>
 <?php else: ?>
-    <div class="message info">Категорий пока нет.</div>
+    <div class="message info"><?= e(t('admin.categories.empty')) ?></div>
 <?php endif; ?>
 
 <?php

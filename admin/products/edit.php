@@ -8,13 +8,9 @@ require_once __DIR__ . '/../header.php';
 $productId = isset($_GET['id']) ? (int)$_GET['id'] : 0;
 
 if ($productId <= 0) {
-    setFlash('error', 'Товар не найден.');
-    redirect('index.php');
+    setFlash('error', t('admin.products.not_found'));
+    redirect('/3d_print_shop/admin/products/index.php');
 }
-
-/* =========================================================
-   ПОЛУЧЕНИЕ ТОВАРА
-   ========================================================= */
 
 $stmt = $mysqli->prepare("
     SELECT *
@@ -28,13 +24,9 @@ $product = $stmt->get_result()->fetch_assoc();
 $stmt->close();
 
 if (!$product) {
-    setFlash('error', 'Товар не найден.');
-    redirect('index.php');
+    setFlash('error', t('admin.products.not_found'));
+    redirect('/3d_print_shop/admin/products/index.php');
 }
-
-/* =========================================================
-   ПОЛУЧЕНИЕ КАТЕГОРИЙ
-   ========================================================= */
 
 $categoriesResult = $mysqli->query("
     SELECT id, name
@@ -44,10 +36,6 @@ $categoriesResult = $mysqli->query("
 $categories = $categoriesResult ? $categoriesResult->fetch_all(MYSQLI_ASSOC) : [];
 
 $errors = [];
-
-/* =========================================================
-   РЕДАКТИРОВАНИЕ ТОВАРА
-   ========================================================= */
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $name = trim((string)($_POST['name'] ?? ''));
@@ -61,20 +49,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $currentImagePath = $product['image_path'];
 
     if ($name === '') {
-        $errors[] = 'Введите название товара.';
+        $errors[] = t('admin.products.name_error');
     }
 
     if ($price <= 0) {
-        $errors[] = 'Цена должна быть больше 0.';
+        $errors[] = t('admin.products.price_error');
     }
-
-    /* =========================================================
-       ЗАГРУЗКА НОВОГО ИЗОБРАЖЕНИЯ
-       ========================================================= */
 
     if (isset($_FILES['image']) && $_FILES['image']['error'] !== UPLOAD_ERR_NO_FILE) {
         if ($_FILES['image']['error'] !== UPLOAD_ERR_OK) {
-            $errors[] = 'Ошибка при загрузке изображения.';
+            $errors[] = t('admin.products.image_upload_error');
         } else {
             $allowedExtensions = ['jpg', 'jpeg', 'png', 'webp'];
             $originalName = (string)$_FILES['image']['name'];
@@ -83,11 +67,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $extension = strtolower(pathinfo($originalName, PATHINFO_EXTENSION));
 
             if (!in_array($extension, $allowedExtensions, true)) {
-                $errors[] = 'Разрешены только изображения JPG, JPEG, PNG, WEBP.';
+                $errors[] = t('admin.products.image_type_error');
             }
 
             if ($fileSize > 5 * 1024 * 1024) {
-                $errors[] = 'Изображение слишком большое. Максимум 5 МБ.';
+                $errors[] = t('admin.products.image_size_error');
             }
 
             if (!$errors) {
@@ -101,7 +85,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $destination = $uploadDir . $newFileName;
 
                 if (!move_uploaded_file($tmpPath, $destination)) {
-                    $errors[] = 'Не удалось сохранить изображение.';
+                    $errors[] = t('admin.products.image_save_error');
                 } else {
                     if (!empty($currentImagePath)) {
                         $oldFile = __DIR__ . '/../../' . $currentImagePath;
@@ -115,10 +99,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         }
     }
-
-    /* =========================================================
-       СОХРАНЕНИЕ ИЗМЕНЕНИЙ
-       ========================================================= */
 
     if (!$errors) {
         $stmt = $mysqli->prepare("
@@ -148,15 +128,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         if ($stmt->execute()) {
             $stmt->close();
-            setFlash('success', 'Товар успешно обновлён.');
-            redirect('index.php');
+            setFlash('success', t('admin.products.update_success'));
+            redirect('/3d_print_shop/admin/products/index.php');
         } else {
             $stmt->close();
-            $errors[] = 'Не удалось обновить товар.';
+            $errors[] = t('admin.products.update_error');
         }
     }
 
-    /* Обновляем локальные данные для повторного вывода формы */
     $product['category_id'] = $categoryId;
     $product['name'] = $name;
     $product['short_description'] = $shortDescription;
@@ -168,8 +147,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 ?>
 
     <div class="page-header">
-        <h2>Редактировать товар</h2>
-        <p>Измените информацию о товаре.</p>
+        <h2><?= e(t('admin.products.edit')) ?></h2>
+        <p><?= e(t('admin.products.subtitle')) ?></p>
     </div>
 
 <?php if (!empty($errors)): ?>
@@ -181,40 +160,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <?php endif; ?>
 
     <form method="post" enctype="multipart/form-data">
-        <label for="name">Название</label>
-        <input
-                type="text"
-                id="name"
-                name="name"
-                value="<?= e((string)$product['name']) ?>"
-                required
-        >
+        <label for="name"><?= e(t('common.name')) ?></label>
+        <input type="text" id="name" name="name" value="<?= e((string)$product['name']) ?>" required>
 
-        <label for="short_description">Краткое описание</label>
-        <input
-                type="text"
-                id="short_description"
-                name="short_description"
-                value="<?= e((string)$product['short_description']) ?>"
-        >
+        <label for="short_description"><?= e(t('common.short_description')) ?></label>
+        <input type="text" id="short_description" name="short_description" value="<?= e((string)$product['short_description']) ?>">
 
-        <label for="description">Полное описание</label>
+        <label for="description"><?= e(t('common.description')) ?></label>
         <textarea id="description" name="description"><?= e((string)$product['description']) ?></textarea>
 
-        <label for="price">Цена (€)</label>
-        <input
-                type="number"
-                step="0.01"
-                min="0.01"
-                id="price"
-                name="price"
-                value="<?= e((string)$product['price']) ?>"
-                required
-        >
+        <label for="price"><?= e(t('common.price')) ?> (€)</label>
+        <input type="number" step="0.01" min="0.01" id="price" name="price" value="<?= e((string)$product['price']) ?>" required>
 
-        <label for="category_id">Категория</label>
+        <label for="category_id"><?= e(t('common.category')) ?></label>
         <select id="category_id" name="category_id">
-            <option value="">Без категории</option>
+            <option value=""><?= e(t('common.none')) ?></option>
             <?php foreach ($categories as $category): ?>
                 <option
                         value="<?= (int)$category['id'] ?>"
@@ -227,22 +187,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         <?php if (!empty($product['image_path'])): ?>
             <div style="margin-bottom: 16px;">
-                <p><strong>Текущее изображение:</strong></p>
+                <p><strong><?= e(t('admin.products.current_image')) ?>:</strong></p>
                 <img
                         src="/3d_print_shop/<?= e((string)$product['image_path']) ?>"
                         alt="<?= e((string)$product['name']) ?>"
-                        style="max-width: 220px; border-radius: 12px;"
+                        class="product-image-preview"
                 >
             </div>
         <?php endif; ?>
 
-        <label for="image">Новое изображение</label>
-        <input
-                type="file"
-                id="image"
-                name="image"
-                accept=".jpg,.jpeg,.png,.webp"
-        >
+        <label for="image"><?= e(t('admin.products.new_image')) ?></label>
+        <input type="file" id="image" name="image" accept=".jpg,.jpeg,.png,.webp">
 
         <label style="display: flex; align-items: center; gap: 10px; font-weight: 600;">
             <input
@@ -252,12 +207,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <?= (int)$product['is_active'] === 1 ? 'checked' : '' ?>
                     style="width: auto; margin: 0;"
             >
-            Товар активен
+            <?= e(t('admin.products.active_label')) ?>
         </label>
 
         <div style="margin-top: 20px; display: flex; gap: 12px; flex-wrap: wrap;">
-            <button type="submit">Сохранить изменения</button>
-            <a href="index.php" class="btn btn-secondary">Отмена</a>
+            <button type="submit"><?= e(t('common.save')) ?></button>
+            <a href="/3d_print_shop/admin/products/index.php" class="btn btn-secondary"><?= e(t('common.cancel')) ?></a>
         </div>
     </form>
 

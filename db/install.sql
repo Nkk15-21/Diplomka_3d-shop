@@ -12,6 +12,20 @@ CREATE TABLE users (
                        created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
+INSERT INTO users (
+    name,
+    email,
+    phone,
+    password_hash,
+    role
+) VALUES (
+             'Admin',
+             'admin@admin.com',
+             '',
+             '$2y$10$IMXfVw/RnHmusrspN8mwT.xMK93q04jbIZLvpsVMfqCPK/aF38bGO',
+             'admin'
+         );
+
 CREATE TABLE categories (
                             id INT AUTO_INCREMENT PRIMARY KEY,
                             name VARCHAR(100) NOT NULL,
@@ -105,5 +119,4 @@ INSERT INTO categories (name, description) VALUES
 INSERT INTO products (category_id, name, short_description, description, price, image_path, is_active) VALUES
                                                                                                            (1, 'Подставка для телефона', 'Удобная подставка для смартфона', 'Компактная 3D-печатная подставка для телефона. Подходит для рабочего стола и дома.', 12.50, 'uploads/images/phone_stand.jpg', 1),
                                                                                                            (2, 'Органайзер для кабелей', 'Держатель для проводов на столе', 'Практичный органайзер для аккуратного размещения кабелей и зарядок.', 7.90, 'uploads/images/cable_holder.jpg', 1),
-                                                                                                           (3, 'Кронштейн', 'Функциональная 3D-печатная деталь', 'Прочный кронштейн для бытового применения и небольших проектов.', 15.00, 'uploads/images/bracket.jpg', 1),
-                                                                                                           (4, 'Фигурка дракона', 'Декоративная фигурка для коллекции', 'Эффектная фигурка дракона. Подойдёт как подарок или украшение полки.', 24.99, 'uploads/images/dragon.jpg', 1);
+                                                                                                (4, 'Фигурка дракона', 'Декоративная фигурка для коллекции', 'Эффектная фигурка дракона. Подойдёт как подарок или украшение полки.', 24.99, 'uploads/images/dragon.jpg', 1);

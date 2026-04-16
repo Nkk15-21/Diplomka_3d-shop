@@ -23,20 +23,22 @@ $flashError = getFlash('error');
         </div>
 
         <nav class="admin-sidebar__nav">
-            <a href="index.php">Главная</a>
-            <a href="orders.php">Заказы товаров</a>
-            <a href="custom_orders.php">Индивидуальные заказы</a>
-            <a href="contacts.php">Сообщения</a>
-            <a href="products/index.php">Товары</a>
-            <a href="categories.php">Категории</a>
-            <a href="users.php">Пользователи</a>
-            <a href="../index.php">На сайт</a>
-            <a href="../logout.php"
+            <a href="/3d_print_shop/admin/index.php">Главная</a>
+            <a href="/3d_print_shop/admin/orders.php">Заказы товаров</a>
+            <a href="/3d_print_shop/admin/custom_orders.php">Индивидуальные заказы</a>
+            <a href="/3d_print_shop/admin/contacts.php">Сообщения</a>
+            <a href="/3d_print_shop/admin/products/index.php">Товары</a>
+            <a href="/3d_print_shop/admin/categories.php">Категории</a>
+            <a href="/3d_print_shop/admin/users.php">Пользователи</a>
+            <a href="/3d_print_shop/index.php">На сайт</a>
+            <a href="/3d_print_shop/logout.php"
                class="danger-link"
                data-confirm="true"
                data-confirm-title="Выход из аккаунта"
                data-confirm-text="Вы уверены, что хотите выйти из аккаунта?"
-               data-confirm-button="Выйти">Выход</a>
+               data-confirm-button="Выйти">
+                Выход
+            </a>
         </nav>
     </aside>
 

@@ -907,3 +907,130 @@ table tr:hover td {
     }
 }
 
+/* =========================================================
+   18. HEADER ACTIONS
+   ========================================================= */
+
+.header-inner {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: 24px;
+    min-height: 82px;
+}
+
+.nav-main {
+    justify-content: center;
+}
+
+.nav-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: nowrap;
+}
+
+.nav-circle-btn {
+    width: 42px;
+    height: 42px;
+    min-width: 42px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 999px;
+    color: #334155;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    padding: 0;
+    transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease;
+}
+
+.nav-circle-btn:hover {
+    background: #eef2ff;
+    color: #1d4ed8;
+    transform: translateY(-1px);
+}
+
+.nav-profile-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+    color: #334155;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 999px;
+    padding: 6px 12px 6px 6px;
+    transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease;
+    max-width: 180px;
+}
+
+.nav-profile-btn:hover {
+    background: #eef2ff;
+    color: #1d4ed8;
+    transform: translateY(-1px);
+}
+
+.nav-profile-icon-wrap {
+    width: 34px;
+    height: 34px;
+    min-width: 34px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 999px;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+}
+
+.nav-profile-name {
+    font-weight: 700;
+    font-size: 14px;
+    line-height: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.nav-svg {
+    width: 20px;
+    height: 20px;
+    display: block;
+}
+
+.nav-logout-btn {
+    color: #dc2626;
+}
+
+.nav-logout-btn:hover {
+    background: #fef2f2;
+    color: #b91c1c;
+}
+
+@media (max-width: 1100px) {
+    .header-inner {
+        grid-template-columns: 1fr;
+        justify-items: center;
+        gap: 14px;
+        padding-top: 10px;
+        padding-bottom: 10px;
+    }
+
+    .nav-main {
+        justify-content: center;
+    }
+
+    .nav-actions {
+        justify-content: center;
+    }
+}
+
+@media (max-width: 700px) {
+    .nav-profile-name {
+        display: none;
+    }
+
+    .nav-profile-btn {
+        padding-right: 6px;
+    }
+}

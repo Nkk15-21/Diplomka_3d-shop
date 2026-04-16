@@ -149,6 +149,37 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if ($stmt->execute()) {
                 $stmt->close();
 
+                require_once __DIR__ . '/mail/mailer.php';
+
+                $mailBody = renderMailTemplate('custom_order_created.php', [
+                        'orderId' => $orderId,
+                        'customerName' => $user['name'],
+                        'customerEmail' => $user['email'],
+                        'customerPhone' => $user['phone'],
+                        'material' => $material,
+                        'color' => $color,
+                        'layerHeight' => $layerHeight,
+                        'infill' => $infill,
+                        'weight' => $weight,
+                        'estimatedPrice' => $estimatedPrice,
+                        'modelFile' => $modelFileForDb,
+                        'comment' => $comment,
+                        'createdAt' => date('Y-m-d H:i:s'),
+                ]);
+
+                $absoluteModelPath = __DIR__ . '/' . $modelFileForDb;
+
+                sendMailToAdmin(
+                        'Новый индивидуальный заказ #' . $orderId,
+                        $mailBody,
+                        [
+                                [
+                                        'path' => $absoluteModelPath,
+                                        'name' => basename($modelFileForDb),
+                                ]
+                        ]
+                );
+
                 setFlash('success', 'Индивидуальный заказ успешно отправлен.');
                 redirect('profile.php');
             } else {

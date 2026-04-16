@@ -32,6 +32,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt->execute();
         $stmt->close();
 
+        require_once __DIR__ . '/mail/mailer.php';
+
+        $mailBody = renderMailTemplate('contact_message.php', [
+                'name' => $name,
+                'email' => $email,
+                'subject' => $subject,
+                'message' => $message,
+                'createdAt' => date('Y-m-d H:i:s'),
+        ]);
+
+        $result = sendMailToAdmin('Новое сообщение с сайта', $mailBody);
+
+        if (!$result) {
+            die('Письмо из контактов не отправилось.');
+        }
+
         setFlash('success', 'Сообщение успешно отправлено.');
         redirect('contacts.php');
     }

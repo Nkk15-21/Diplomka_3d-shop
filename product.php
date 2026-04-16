@@ -141,6 +141,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt->execute();
             $stmt->close();
 
+            require_once __DIR__ . '/mail/mailer.php';
+
+            $mailBody = renderMailTemplate('order_created.php', [
+                    'orderId' => $orderId,
+                    'customerName' => $user['name'],
+                    'customerEmail' => $user['email'],
+                    'customerPhone' => $user['phone'],
+                    'productName' => $product['name'],
+                    'quantity' => $quantity,
+                    'unitPrice' => $unitPrice,
+                    'totalAmount' => $totalAmount,
+                    'createdAt' => date('Y-m-d H:i:s'),
+            ]);
+
+            $result = sendMailToAdmin('Новый заказ товара #' . $orderId, $mailBody);
+
+            if (!$result) {
+                die('Письмо по заказу товара не отправилось.');
+            }
+
             setFlash('success', 'Заказ успешно оформлен.');
             redirect('profile.php');
         }

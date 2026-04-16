@@ -38,9 +38,9 @@ $flashError = getFlash('error');
 
         <div class="header-right">
             <div class="lang-switcher">
-                <a href="?lang=ru" class="lang-btn <?= currentLang() === 'ru' ? 'active' : '' ?>">Rus</a>
-                <a href="?lang=en" class="lang-btn <?= currentLang() === 'en' ? 'active' : '' ?>">Eng</a>
-                <a href="?lang=et" class="lang-btn <?= currentLang() === 'et' ? 'active' : '' ?>">Est</a>
+                <a href="?lang=ru" class="lang-btn <?= currentLang() === 'ru' ? 'active' : '' ?>"><?= e(t('lang.ru')) ?></a>
+                <a href="?lang=en" class="lang-btn <?= currentLang() === 'en' ? 'active' : '' ?>"><?= e(t('lang.en')) ?></a>
+                <a href="?lang=et" class="lang-btn <?= currentLang() === 'et' ? 'active' : '' ?>"><?= e(t('lang.et')) ?></a>
             </div>
 
             <nav class="nav nav-actions">

@@ -1,35 +1,29 @@
 <?php
 declare(strict_types=1);
+
 require_once __DIR__ . '/includes/header.php';
 ?>
 
     <div class="page-header">
-        <h1>Блог</h1>
-        <p>Полезная информация для клиентов и для тех, кто заказывает 3D-печать впервые.</p>
+        <h1><?= e(t('blog.title')) ?></h1>
+        <p><?= e(t('blog.subtitle')) ?></p>
     </div>
 
-    <div class="card" style="margin-bottom: 20px;">
-        <h3>Как подготовить 3D-модель к печати</h3>
-        <p>
-            Перед отправкой модели желательно проверить размеры, толщину стенок, закрытость геометрии
-            и отсутствие лишних ошибок в сетке. Это помогает избежать проблем при печати.
-        </p>
-    </div>
+    <div class="grid-3">
+        <div class="card">
+            <h3><?= e(t('blog.prepare.title')) ?></h3>
+            <p><?= e(t('blog.prepare.text')) ?></p>
+        </div>
 
-    <div class="card" style="margin-bottom: 20px;">
-        <h3>Какой материал выбрать</h3>
-        <p>
-            PLA подходит для большинства декоративных и бытовых задач. PETG более устойчив к нагрузкам
-            и влаге. ABS и ASA лучше подходят для более сложных условий. TPU используют, если нужна гибкость.
-        </p>
-    </div>
+        <div class="card">
+            <h3><?= e(t('blog.material.title')) ?></h3>
+            <p><?= e(t('blog.material.text')) ?></p>
+        </div>
 
-    <div class="card">
-        <h3>Что влияет на цену 3D-печати</h3>
-        <p>
-            На стоимость обычно влияют материал, вес изделия, высота слоя, заполнение, сложность модели,
-            время печати и необходимость дополнительной обработки.
-        </p>
+        <div class="card">
+            <h3><?= e(t('blog.price.title')) ?></h3>
+            <p><?= e(t('blog.price.text')) ?></p>
+        </div>
     </div>
 
 <?php

@@ -1,42 +1,43 @@
 <?php
 declare(strict_types=1);
+
 require_once __DIR__ . '/includes/header.php';
 ?>
 
     <div class="page-header">
-        <h1>Услуги</h1>
-        <p>Что можно заказать в нашем сервисе 3D-печати.</p>
+        <h1><?= e(t('services.title')) ?></h1>
+        <p><?= e(t('services.subtitle')) ?></p>
     </div>
 
     <div class="grid-3">
         <div class="card">
-            <h3>Печать готовых моделей</h3>
-            <p>Изготовление популярных изделий: подставок, держателей, аксессуаров и декоративных предметов.</p>
+            <h3><?= e(t('services.ready.title')) ?></h3>
+            <p><?= e(t('services.ready.text')) ?></p>
         </div>
 
         <div class="card">
-            <h3>Индивидуальная печать</h3>
-            <p>Печать по вашему STL, OBJ или STEP-файлу с выбором материала и параметров.</p>
+            <h3><?= e(t('services.proto.title')) ?></h3>
+            <p><?= e(t('services.proto.text')) ?></p>
         </div>
 
         <div class="card">
-            <h3>Прототипирование</h3>
-            <p>Создание прототипов деталей и быстрых тестовых образцов для проектов и идей.</p>
+            <h3><?= e(t('services.parts.title')) ?></h3>
+            <p><?= e(t('services.parts.text')) ?></p>
         </div>
 
         <div class="card">
-            <h3>Фигурки и декор</h3>
-            <p>Декоративные изделия, фигурки, элементы для интерьера и подарков.</p>
+            <h3><?= e(t('services.modeling.title')) ?></h3>
+            <p><?= e(t('services.modeling.text')) ?></p>
         </div>
 
         <div class="card">
-            <h3>Функциональные детали</h3>
-            <p>Кронштейны, заглушки, крепления, простые механические элементы и полезные бытовые детали.</p>
+            <h3><?= e(t('services.post.title')) ?></h3>
+            <p><?= e(t('services.post.text')) ?></p>
         </div>
 
         <div class="card">
-            <h3>Подбор материала</h3>
-            <p>Помощь в выборе PLA, PETG, ABS, ASA, TPU и других материалов под конкретную задачу.</p>
+            <h3><?= e(t('services.materials.title')) ?></h3>
+            <p><?= e(t('services.materials.text')) ?></p>
         </div>
     </div>
 

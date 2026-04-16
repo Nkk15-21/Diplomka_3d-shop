@@ -4,16 +4,11 @@ declare(strict_types=1);
 require_once __DIR__ . '/includes/auth.php';
 requireLogin();
 
-/* =========================================================
-   ПОДГОТОВКА ДАННЫХ
-   ========================================================= */
-
 $userId = (int)$_SESSION['user_id'];
 $materialsList = getMaterialsList();
 $errors = [];
 $estimatedPricePreview = null;
 
-/* Получаем данные текущего пользователя */
 $stmt = $mysqli->prepare("
     SELECT id, name, email, phone
     FROM users
@@ -26,13 +21,9 @@ $user = $stmt->get_result()->fetch_assoc();
 $stmt->close();
 
 if (!$user) {
-    setFlash('error', 'Пользователь не найден.');
-    redirect('logout.php');
+    setFlash('error', t('login.error'));
+    redirect('/3d_print_shop/logout.php');
 }
-
-/* =========================================================
-   ОБРАБОТКА ФОРМЫ
-   ========================================================= */
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $material = trim((string)($_POST['material'] ?? ''));
@@ -42,38 +33,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $weight = isset($_POST['weight']) ? (float)$_POST['weight'] : 0.0;
     $comment = trim((string)($_POST['comment'] ?? ''));
 
-    /* =========================================================
-       ВАЛИДАЦИЯ
-       ========================================================= */
-
     if (!in_array($material, $materialsList, true)) {
-        $errors[] = 'Выберите материал из списка.';
+        $errors[] = t('custom.material_error');
     }
 
     if ($layerHeight <= 0) {
-        $errors[] = 'Введите корректную высоту слоя.';
+        $errors[] = t('custom.layer_error');
     }
 
     if ($infill < 0 || $infill > 100) {
-        $errors[] = 'Заполнение должно быть от 0 до 100.';
+        $errors[] = t('custom.infill_error');
     }
 
     if ($weight <= 0) {
-        $errors[] = 'Введите корректный вес модели.';
+        $errors[] = t('custom.weight_error');
     }
 
     if (!isset($_FILES['model_file']) || $_FILES['model_file']['error'] !== UPLOAD_ERR_OK) {
-        $errors[] = 'Загрузите файл модели.';
+        $errors[] = t('custom.file_required');
     }
 
-    /* Предварительный расчёт цены */
-    if (!$errors) {
+    if ($material !== '' && $layerHeight > 0 && $weight > 0 && $infill >= 0 && $infill <= 100) {
         $estimatedPricePreview = calculateCustomOrderPrice($material, $weight, $layerHeight, $infill);
     }
-
-    /* =========================================================
-       ПРОВЕРКА И СОХРАНЕНИЕ ФАЙЛА
-       ========================================================= */
 
     if (!$errors) {
         $allowedExtensions = ['stl', 'obj', 'step', 'stp'];
@@ -81,15 +63,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $originalFileName = (string)$_FILES['model_file']['name'];
         $tmpFilePath = (string)$_FILES['model_file']['tmp_name'];
         $fileSize = (int)$_FILES['model_file']['size'];
-
         $fileExtension = strtolower(pathinfo($originalFileName, PATHINFO_EXTENSION));
 
         if (!in_array($fileExtension, $allowedExtensions, true)) {
-            $errors[] = 'Разрешены только файлы .stl, .obj, .step и .stp.';
+            $errors[] = t('custom.file_types_error');
         }
 
         if ($fileSize > 20 * 1024 * 1024) {
-            $errors[] = 'Файл слишком большой. Максимальный размер: 20 МБ.';
+            $errors[] = t('custom.file_size_error');
         }
 
         $uploadDir = __DIR__ . '/uploads/models/';
@@ -99,16 +80,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 
-    /* =========================================================
-       СОХРАНЕНИЕ В БД
-       ========================================================= */
-
     if (!$errors) {
         $newFileName = uniqid('model_', true) . '.' . $fileExtension;
         $destinationPath = $uploadDir . $newFileName;
 
         if (!move_uploaded_file($tmpFilePath, $destinationPath)) {
-            $errors[] = 'Не удалось сохранить загруженный файл.';
+            $errors[] = t('custom.file_save_error');
         } else {
             $modelFileForDb = 'uploads/models/' . $newFileName;
             $estimatedPrice = calculateCustomOrderPrice($material, $weight, $layerHeight, $infill);
@@ -147,6 +124,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             );
 
             if ($stmt->execute()) {
+                $orderId = $stmt->insert_id;
                 $stmt->close();
 
                 require_once __DIR__ . '/mail/mailer.php';
@@ -170,7 +148,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $absoluteModelPath = __DIR__ . '/' . $modelFileForDb;
 
                 sendMailToAdmin(
-                        'Новый индивидуальный заказ #' . $orderId,
+                        'New custom order / Новый индивидуальный заказ #' . $orderId,
                         $mailBody,
                         [
                                 [
@@ -180,18 +158,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         ]
                 );
 
-                setFlash('success', 'Индивидуальный заказ успешно отправлен.');
-                redirect('profile.php');
+                setFlash('success', t('custom.success'));
+                redirect('/3d_print_shop/profile.php');
             } else {
                 $stmt->close();
-                $errors[] = 'Не удалось сохранить заказ в базу данных.';
+                $errors[] = t('custom.save_error');
             }
         }
-    }
-
-    /* Если есть ошибки, но данные валидные для расчёта, оставляем превью цены */
-    if ($estimatedPricePreview === null && $material !== '' && $layerHeight > 0 && $weight > 0 && $infill >= 0 && $infill <= 100) {
-        $estimatedPricePreview = calculateCustomOrderPrice($material, $weight, $layerHeight, $infill);
     }
 }
 
@@ -199,8 +172,8 @@ require_once __DIR__ . '/includes/header.php';
 ?>
 
     <div class="page-header">
-        <h1>Индивидуальный заказ</h1>
-        <p>Загрузите 3D-файл, выберите параметры печати и получите примерную стоимость.</p>
+        <h1><?= e(t('custom.title')) ?></h1>
+        <p><?= e(t('custom.subtitle')) ?></p>
     </div>
 
 <?php if (!empty($errors)): ?>
@@ -212,11 +185,8 @@ require_once __DIR__ . '/includes/header.php';
 <?php endif; ?>
 
     <div class="calculator-box">
-        <h2>Калькулятор стоимости</h2>
-        <p class="small-text">
-            Это ориентировочный расчёт. Финальная стоимость может отличаться в зависимости
-            от сложности модели, времени печати и дополнительной обработки.
-        </p>
+        <h2><?= e(t('custom.calc.title')) ?></h2>
+        <p class="small-text"><?= e(t('custom.calc.subtitle')) ?></p>
 
         <div class="calculator-price" id="pricePreview">
             €<?= number_format((float)($estimatedPricePreview ?? 0), 2) ?>
@@ -224,9 +194,9 @@ require_once __DIR__ . '/includes/header.php';
     </div>
 
     <form method="post" enctype="multipart/form-data" id="customOrderForm">
-        <label for="material">Материал</label>
+        <label for="material"><?= e(t('common.material')) ?></label>
         <select id="material" name="material" required>
-            <option value="">Выберите материал</option>
+            <option value=""><?= e(t('common.material')) ?></option>
             <?php foreach ($materialsList as $materialOption): ?>
                 <option value="<?= e($materialOption) ?>" <?= old('material') === $materialOption ? 'selected' : '' ?>>
                     <?= e($materialOption) ?>
@@ -234,16 +204,16 @@ require_once __DIR__ . '/includes/header.php';
             <?php endforeach; ?>
         </select>
 
-        <label for="color">Цвет</label>
+        <label for="color"><?= e(t('common.color')) ?></label>
         <input
                 type="text"
                 id="color"
                 name="color"
                 value="<?= e(old('color')) ?>"
-                placeholder="Например: чёрный, белый, красный"
+                placeholder="<?= e(t('custom.color_placeholder')) ?>"
         >
 
-        <label for="layer_height">Высота слоя (мм)</label>
+        <label for="layer_height"><?= e(t('common.layer_height')) ?> (мм)</label>
         <input
                 type="number"
                 step="0.01"
@@ -254,7 +224,7 @@ require_once __DIR__ . '/includes/header.php';
                 required
         >
 
-        <label for="infill">Заполнение (%)</label>
+        <label for="infill"><?= e(t('common.infill')) ?> (%)</label>
         <input
                 type="number"
                 min="0"
@@ -265,7 +235,7 @@ require_once __DIR__ . '/includes/header.php';
                 required
         >
 
-        <label for="weight">Вес модели (г)</label>
+        <label for="weight"><?= e(t('common.weight')) ?> (г)</label>
         <input
                 type="number"
                 step="0.01"
@@ -276,7 +246,7 @@ require_once __DIR__ . '/includes/header.php';
                 required
         >
 
-        <label for="model_file">Файл модели</label>
+        <label for="model_file"><?= e(t('custom.file_label')) ?></label>
         <input
                 type="file"
                 id="model_file"
@@ -285,10 +255,10 @@ require_once __DIR__ . '/includes/header.php';
                 required
         >
 
-        <label for="comment">Комментарий</label>
+        <label for="comment"><?= e(t('common.comment')) ?></label>
         <textarea id="comment" name="comment"><?= e(old('comment')) ?></textarea>
 
-        <button type="submit">Отправить заказ</button>
+        <button type="submit"><?= e(t('custom.send')) ?></button>
     </form>
 
     <script>

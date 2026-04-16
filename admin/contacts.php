@@ -5,10 +5,6 @@ require_once __DIR__ . '/../includes/functions.php';
 require_once __DIR__ . '/../includes/db.php';
 require_once __DIR__ . '/header.php';
 
-/* =========================================================
-   ПОЛУЧЕНИЕ СООБЩЕНИЙ
-   ========================================================= */
-
 $result = $mysqli->query("
     SELECT
         id,
@@ -23,19 +19,19 @@ $result = $mysqli->query("
 ?>
 
     <div class="page-header">
-        <h2>Сообщения из формы контактов</h2>
-        <p>Здесь отображаются все обращения, отправленные через страницу контактов.</p>
+        <h2><?= e(t('admin.contacts.title')) ?></h2>
+        <p><?= e(t('admin.contacts.subtitle')) ?></p>
     </div>
 
 <?php if ($result && $result->num_rows > 0): ?>
     <table>
         <tr>
             <th>ID</th>
-            <th>Имя</th>
-            <th>Email</th>
-            <th>Тема</th>
-            <th>Сообщение</th>
-            <th>Дата</th>
+            <th><?= e(t('common.name')) ?></th>
+            <th><?= e(t('common.email')) ?></th>
+            <th><?= e(t('common.subject')) ?></th>
+            <th><?= e(t('common.message')) ?></th>
+            <th><?= e(t('common.date')) ?></th>
         </tr>
 
         <?php while ($contact = $result->fetch_assoc()): ?>
@@ -43,7 +39,7 @@ $result = $mysqli->query("
                 <td><?= (int)$contact['id'] ?></td>
                 <td><?= e($contact['name']) ?></td>
                 <td><?= e($contact['email']) ?></td>
-                <td><?= e($contact['subject'] ?: 'Без темы') ?></td>
+                <td><?= e($contact['subject'] ?: t('common.none')) ?></td>
                 <td>
                     <div class="admin-message-box">
                         <?= nl2br(e($contact['message'])) ?>
@@ -54,7 +50,7 @@ $result = $mysqli->query("
         <?php endwhile; ?>
     </table>
 <?php else: ?>
-    <div class="message info">Сообщений пока нет.</div>
+    <div class="message info"><?= e(t('admin.contacts.empty')) ?></div>
 <?php endif; ?>
 
 <?php

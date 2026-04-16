@@ -3,48 +3,49 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/auth.php';
 require_once __DIR__ . '/../includes/functions.php';
+require_once __DIR__ . '/../lang/i18n.php';
 
 $flashSuccess = getFlash('success');
 $flashError = getFlash('error');
 ?>
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="<?= e(currentLang()) ?>">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Админка | 3D Print Shop</title>
+    <title><?= e(t('admin.title')) ?> | <?= e(t('site.title')) ?></title>
     <link rel="stylesheet" href="/3d_print_shop/css/style.css">
 </head>
 <body>
 <div class="admin-layout">
     <aside class="admin-sidebar">
         <div class="admin-sidebar__logo">
-            <a href="index.php">Админка</a>
+            <a href="/3d_print_shop/admin/index.php"><?= e(t('admin.title')) ?></a>
         </div>
 
         <nav class="admin-sidebar__nav">
-            <a href="/3d_print_shop/admin/index.php">Главная</a>
-            <a href="/3d_print_shop/admin/orders.php">Заказы товаров</a>
-            <a href="/3d_print_shop/admin/custom_orders.php">Индивидуальные заказы</a>
-            <a href="/3d_print_shop/admin/contacts.php">Сообщения</a>
-            <a href="/3d_print_shop/admin/products/index.php">Товары</a>
-            <a href="/3d_print_shop/admin/categories.php">Категории</a>
-            <a href="/3d_print_shop/admin/users.php">Пользователи</a>
-            <a href="/3d_print_shop/index.php">На сайт</a>
+            <a href="/3d_print_shop/admin/index.php"><?= e(t('nav.home')) ?></a>
+            <a href="/3d_print_shop/admin/orders.php"><?= e(t('admin.orders')) ?></a>
+            <a href="/3d_print_shop/admin/custom_orders.php"><?= e(t('admin.custom_orders')) ?></a>
+            <a href="/3d_print_shop/admin/contacts.php"><?= e(t('admin.contacts')) ?></a>
+            <a href="/3d_print_shop/admin/products/index.php"><?= e(t('admin.products')) ?></a>
+            <a href="/3d_print_shop/admin/categories.php"><?= e(t('common.categories')) ?></a>
+            <a href="/3d_print_shop/admin/users.php"><?= e(t('admin.users')) ?></a>
+            <a href="/3d_print_shop/index.php"><?= e(t('admin.to_site')) ?></a>
             <a href="/3d_print_shop/logout.php"
                class="danger-link"
                data-confirm="true"
-               data-confirm-title="Выход из аккаунта"
-               data-confirm-text="Вы уверены, что хотите выйти из аккаунта?"
-               data-confirm-button="Выйти">
-                Выход
+               data-confirm-title="<?= e(t('logout.title')) ?>"
+               data-confirm-text="<?= e(t('logout.text')) ?>"
+               data-confirm-button="<?= e(t('logout.button')) ?>">
+                <?= e(t('nav.logout')) ?>
             </a>
         </nav>
     </aside>
 
     <div class="admin-content">
         <header class="admin-topbar">
-            <h1>Панель администратора</h1>
+            <h1><?= e(t('admin.title')) ?></h1>
             <div class="admin-topbar__user">
                 <?= e($_SESSION['user_name'] ?? 'admin') ?>
             </div>

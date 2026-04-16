@@ -5,7 +5,7 @@ return [
     'host' => 'smtp.gmail.com',
     'port' => 587,
     'username' => 'plastikmaailm.domen@gmail.com',
-    'password' => '',
+    'password' => 'hlqd wmiw wgxg gpal',
     'from_email' => 'plastikmaailm.domen@gmail.com',
     'from_name' => '3D Print Shop',
     'admin_email' => 'plastikmaailm.domen@gmail.com',

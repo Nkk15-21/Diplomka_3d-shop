@@ -12,15 +12,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $message = trim((string)($_POST['message'] ?? ''));
 
     if (!isValidName($name)) {
-        $errors[] = 'Введите корректное имя.';
+        $errors[] = t('contacts.name_error');
     }
 
     if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-        $errors[] = 'Введите корректный e-mail.';
+        $errors[] = t('contacts.email_error');
     }
 
     if (mb_strlen($message) < 10) {
-        $errors[] = 'Сообщение слишком короткое.';
+        $errors[] = t('contacts.message_error');
     }
 
     if (!$errors) {
@@ -29,27 +29,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             VALUES (?, ?, ?, ?)
         ");
         $stmt->bind_param('ssss', $name, $email, $subject, $message);
-        $stmt->execute();
-        $stmt->close();
 
-        require_once __DIR__ . '/mail/mailer.php';
+        if ($stmt->execute()) {
+            $stmt->close();
 
-        $mailBody = renderMailTemplate('contact_message.php', [
-                'name' => $name,
-                'email' => $email,
-                'subject' => $subject,
-                'message' => $message,
-                'createdAt' => date('Y-m-d H:i:s'),
-        ]);
+            require_once __DIR__ . '/mail/mailer.php';
 
-        $result = sendMailToAdmin('Новое сообщение с сайта', $mailBody);
+            $mailBody = renderMailTemplate('contact_message.php', [
+                    'name' => $name,
+                    'email' => $email,
+                    'subject' => $subject,
+                    'message' => $message,
+                    'createdAt' => date('Y-m-d H:i:s'),
+            ]);
 
-        if (!$result) {
-            die('Письмо из контактов не отправилось.');
+            sendMailToAdmin('New contact message / Новое сообщение с сайта', $mailBody);
+
+            setFlash('success', t('contacts.success'));
+            redirect('/3d_print_shop/contacts.php');
+        } else {
+            $stmt->close();
+            $errors[] = t('contacts.save_error');
         }
-
-        setFlash('success', 'Сообщение успешно отправлено.');
-        redirect('contacts.php');
     }
 }
 
@@ -57,8 +58,8 @@ require_once __DIR__ . '/includes/header.php';
 ?>
 
     <div class="page-header">
-        <h1>Контакты</h1>
-        <p>Напишите нам, если хотите уточнить материал, сроки, стоимость или детали заказа.</p>
+        <h1><?= e(t('contacts.title')) ?></h1>
+        <p><?= e(t('contacts.subtitle')) ?></p>
     </div>
 
 <?php if ($errors): ?>
@@ -70,19 +71,19 @@ require_once __DIR__ . '/includes/header.php';
 <?php endif; ?>
 
     <form method="post">
-        <label for="name">Имя</label>
+        <label for="name"><?= e(t('common.name')) ?></label>
         <input type="text" id="name" name="name" value="<?= e(old('name')) ?>" required>
 
-        <label for="email">E-mail</label>
+        <label for="email"><?= e(t('common.email')) ?></label>
         <input type="email" id="email" name="email" value="<?= e(old('email')) ?>" required>
 
-        <label for="subject">Тема</label>
+        <label for="subject"><?= e(t('common.subject')) ?></label>
         <input type="text" id="subject" name="subject" value="<?= e(old('subject')) ?>">
 
-        <label for="message">Сообщение</label>
+        <label for="message"><?= e(t('common.message')) ?></label>
         <textarea id="message" name="message" required><?= e(old('message')) ?></textarea>
 
-        <button type="submit">Отправить</button>
+        <button type="submit"><?= e(t('contacts.send')) ?></button>
     </form>
 
 <?php

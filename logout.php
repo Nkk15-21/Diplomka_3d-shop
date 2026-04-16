@@ -5,5 +5,5 @@ require_once __DIR__ . '/includes/auth.php';
 
 unset($_SESSION['user_id'], $_SESSION['user_name'], $_SESSION['user_role']);
 
-setFlash('success', 'Вы вышли из аккаунта.');
-redirect('index.php');
+setFlash('success', t('logout.button'));
+redirect('/3d_print_shop/index.php');

@@ -14,12 +14,24 @@ $stmt = $mysqli->prepare("
     SELECT
         p.id,
         p.name,
+        p.name_ru,
+        p.name_en,
+        p.name_et,
         p.short_description,
+        p.short_description_ru,
+        p.short_description_en,
+        p.short_description_et,
         p.description,
+        p.description_ru,
+        p.description_en,
+        p.description_et,
         p.price,
         p.image_path,
         p.is_active,
-        c.name AS category_name
+        c.name AS category_name,
+        c.name_ru AS category_name_ru,
+        c.name_en AS category_name_en,
+        c.name_et AS category_name_et
     FROM products p
     LEFT JOIN categories c ON c.id = p.category_id
     WHERE p.id = ? AND p.is_active = 1
@@ -116,7 +128,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     'customerName' => $user['name'],
                     'customerEmail' => $user['email'],
                     'customerPhone' => $user['phone'],
-                    'productName' => $product['name'],
+                    'productName' => tdb($product, 'name'),
                     'quantity' => $quantity,
                     'unitPrice' => $unitPrice,
                     'totalAmount' => $totalAmount,
@@ -132,12 +144,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 require_once __DIR__ . '/includes/header.php';
+
+$categoryTitle = tdb([
+        'name_ru' => $product['category_name_ru'] ?? '',
+        'name_en' => $product['category_name_en'] ?? '',
+        'name_et' => $product['category_name_et'] ?? '',
+        'name' => $product['category_name'] ?? '',
+], 'name');
 ?>
 
     <div class="page-header">
-        <h1><?= e($product['name']) ?></h1>
+        <h1><?= e(tdb($product, 'name')) ?></h1>
         <p class="small-text">
-            <?= e(t('common.category')) ?>: <?= e($product['category_name'] ?: t('common.none')) ?>
+            <?= e(t('common.category')) ?>: <?= e($categoryTitle ?: t('common.none')) ?>
         </p>
     </div>
 
@@ -154,7 +173,7 @@ require_once __DIR__ . '/includes/header.php';
             <div style="margin-bottom: 20px;">
                 <img
                         src="/3d_print_shop/<?= e($product['image_path']) ?>"
-                        alt="<?= e($product['name']) ?>"
+                        alt="<?= e(tdb($product, 'name')) ?>"
                         style="max-width: 100%; border-radius: 16px;"
                 >
             </div>
@@ -162,12 +181,12 @@ require_once __DIR__ . '/includes/header.php';
 
         <p>
             <strong><?= e(t('product.short_description')) ?>:</strong>
-            <?= e($product['short_description'] ?: t('common.none')) ?>
+            <?= e(tdb($product, 'short_description') ?: t('common.none')) ?>
         </p>
 
         <p>
             <strong><?= e(t('product.description')) ?>:</strong><br>
-            <?= nl2br(e($product['description'] ?: t('common.none'))) ?>
+            <?= nl2br(e(tdb($product, 'description') ?: t('common.none'))) ?>
         </p>
 
         <p class="price">

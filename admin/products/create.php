@@ -8,29 +8,47 @@ require_once __DIR__ . '/../header.php';
 $errors = [];
 
 $categoriesResult = $mysqli->query("
-    SELECT id, name
+    SELECT
+        id,
+        name,
+        name_ru,
+        name_en,
+        name_et
     FROM categories
-    ORDER BY name ASC
+    ORDER BY COALESCE(name_ru, name, id) ASC
 ");
 $categories = $categoriesResult ? $categoriesResult->fetch_all(MYSQLI_ASSOC) : [];
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $name = trim((string)($_POST['name'] ?? ''));
-    $shortDescription = trim((string)($_POST['short_description'] ?? ''));
-    $description = trim((string)($_POST['description'] ?? ''));
+    $nameRu = trim((string)($_POST['name_ru'] ?? ''));
+    $nameEn = trim((string)($_POST['name_en'] ?? ''));
+    $nameEt = trim((string)($_POST['name_et'] ?? ''));
+
+    $shortRu = trim((string)($_POST['short_description_ru'] ?? ''));
+    $shortEn = trim((string)($_POST['short_description_en'] ?? ''));
+    $shortEt = trim((string)($_POST['short_description_et'] ?? ''));
+
+    $descRu = trim((string)($_POST['description_ru'] ?? ''));
+    $descEn = trim((string)($_POST['description_en'] ?? ''));
+    $descEt = trim((string)($_POST['description_et'] ?? ''));
+
     $price = isset($_POST['price']) ? (float)$_POST['price'] : 0;
     $categoryId = isset($_POST['category_id']) && $_POST['category_id'] !== ''
             ? (int)$_POST['category_id']
             : null;
     $isActive = isset($_POST['is_active']) ? 1 : 0;
 
-    if ($name === '') {
+    if ($nameRu === '' && $nameEn === '' && $nameEt === '') {
         $errors[] = t('admin.products.name_error');
     }
 
     if ($price <= 0) {
         $errors[] = t('admin.products.price_error');
     }
+
+    $legacyName = $nameRu !== '' ? $nameRu : ($nameEn !== '' ? $nameEn : $nameEt);
+    $legacyShort = $shortRu !== '' ? $shortRu : ($shortEn !== '' ? $shortEn : $shortEt);
+    $legacyDesc = $descRu !== '' ? $descRu : ($descEn !== '' ? $descEn : $descEt);
 
     $imagePath = null;
 
@@ -76,21 +94,39 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             INSERT INTO products (
                 category_id,
                 name,
+                name_ru,
+                name_en,
+                name_et,
                 short_description,
+                short_description_ru,
+                short_description_en,
+                short_description_et,
                 description,
+                description_ru,
+                description_en,
+                description_et,
                 price,
                 image_path,
                 is_active
             )
-            VALUES (?, ?, ?, ?, ?, ?, ?)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ");
 
         $stmt->bind_param(
-                'isssdsi',
+                'issssssssssssdsi',
                 $categoryId,
-                $name,
-                $shortDescription,
-                $description,
+                $legacyName,
+                $nameRu,
+                $nameEn,
+                $nameEt,
+                $legacyShort,
+                $shortRu,
+                $shortEn,
+                $shortEt,
+                $legacyDesc,
+                $descRu,
+                $descEn,
+                $descEt,
                 $price,
                 $imagePath,
                 $isActive
@@ -122,14 +158,35 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <?php endif; ?>
 
     <form method="post" enctype="multipart/form-data">
-        <label for="name"><?= e(t('common.name')) ?></label>
-        <input type="text" id="name" name="name" value="<?= e(old('name')) ?>" required>
+        <h3>RU</h3>
+        <label for="name_ru">Название (RU)</label>
+        <input type="text" id="name_ru" name="name_ru" value="<?= e(old('name_ru')) ?>">
 
-        <label for="short_description"><?= e(t('common.short_description')) ?></label>
-        <input type="text" id="short_description" name="short_description" value="<?= e(old('short_description')) ?>">
+        <label for="short_description_ru">Краткое описание (RU)</label>
+        <input type="text" id="short_description_ru" name="short_description_ru" value="<?= e(old('short_description_ru')) ?>">
 
-        <label for="description"><?= e(t('common.description')) ?></label>
-        <textarea id="description" name="description"><?= e(old('description')) ?></textarea>
+        <label for="description_ru">Описание (RU)</label>
+        <textarea id="description_ru" name="description_ru"><?= e(old('description_ru')) ?></textarea>
+
+        <h3>EN</h3>
+        <label for="name_en">Name (EN)</label>
+        <input type="text" id="name_en" name="name_en" value="<?= e(old('name_en')) ?>">
+
+        <label for="short_description_en">Short description (EN)</label>
+        <input type="text" id="short_description_en" name="short_description_en" value="<?= e(old('short_description_en')) ?>">
+
+        <label for="description_en">Description (EN)</label>
+        <textarea id="description_en" name="description_en"><?= e(old('description_en')) ?></textarea>
+
+        <h3>ET</h3>
+        <label for="name_et">Nimi (ET)</label>
+        <input type="text" id="name_et" name="name_et" value="<?= e(old('name_et')) ?>">
+
+        <label for="short_description_et">Lühikirjeldus (ET)</label>
+        <input type="text" id="short_description_et" name="short_description_et" value="<?= e(old('short_description_et')) ?>">
+
+        <label for="description_et">Kirjeldus (ET)</label>
+        <textarea id="description_et" name="description_et"><?= e(old('description_et')) ?></textarea>
 
         <label for="price"><?= e(t('common.price')) ?> (€)</label>
         <input type="number" step="0.01" min="0.01" id="price" name="price" value="<?= e(old('price')) ?>" required>
@@ -142,7 +199,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         value="<?= (int)$category['id'] ?>"
                         <?= old('category_id') === (string)$category['id'] ? 'selected' : '' ?>
                 >
-                    <?= e($category['name']) ?>
+                    <?= e(tdb($category, 'name')) ?>
                 </option>
             <?php endforeach; ?>
         </select>

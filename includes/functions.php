@@ -5,13 +5,14 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
+require_once __DIR__ . '/../lang/i18n.php';
+
 /* =========================================================
    ЭКРАНИРОВАНИЕ ВЫВОДА
    ========================================================= */
 
 /**
  * Безопасный вывод текста в HTML.
- * Поддерживает строки, числа и null.
  */
 function e(string|int|float|null $value): string
 {
@@ -56,7 +57,7 @@ function getFlash(string $type): ?string
         return null;
     }
 
-    $message = $_SESSION[$key];
+    $message = (string)$_SESSION[$key];
     unset($_SESSION[$key]);
 
     return $message;
@@ -77,13 +78,12 @@ function isLoggedIn(): bool
 
 /**
  * Требует вход в аккаунт.
- * Если пользователь не вошёл, отправляет на login.php.
  */
 function requireLogin(): void
 {
     if (!isLoggedIn()) {
-        setFlash('error', 'Сначала войдите в аккаунт.');
-        redirect('login.php');
+        setFlash('error', t('login.error'));
+        redirect('/3d_print_shop/login.php');
     }
 }
 
@@ -103,7 +103,7 @@ function isValidName(string $name): bool
 
 /**
  * Проверка телефона.
- * Разрешены цифры, пробелы, + и -.
+ * Разрешены цифры, пробелы, +, -, скобки.
  * Пустое значение тоже допустимо.
  */
 function isValidPhone(string $phone): bool
@@ -112,7 +112,7 @@ function isValidPhone(string $phone): bool
         return true;
     }
 
-    return (bool)preg_match('/^[0-9+\-\s]{5,50}$/', $phone);
+    return (bool)preg_match('/^[0-9+\-\s()]{5,50}$/', $phone);
 }
 
 
@@ -232,4 +232,56 @@ function calculateCustomOrderPrice(string $material, float $weight, float $layer
     $price = ($basePrice + ($weight * $ratePerGram)) * $layerCoefficient * $infillCoefficient;
 
     return round($price, 2);
+}
+
+
+/* =========================================================
+   МУЛЬТИЯЗЫЧНЫЕ ПОЛЯ ИЗ БД
+   ========================================================= */
+
+/**
+ * Возвращает имя поля с языковым суффиксом.
+ * Например: fieldByLang('name') => name_ru
+ */
+function fieldByLang(string $baseField, ?string $lang = null): string
+{
+    $lang = $lang ?? currentLang();
+    return $baseField . '_' . $lang;
+}
+
+/**
+ * Возвращает значение мультиязычного поля из БД
+ * с fallback на другие языки и старое поле без суффикса.
+ */
+function tdb(array $row, string $field): string
+{
+    $lang = currentLang();
+    $langField = $field . '_' . $lang;
+
+    if (!empty($row[$langField])) {
+        return (string)$row[$langField];
+    }
+
+    foreach (['ru', 'en', 'et'] as $fallbackLang) {
+        $fallbackField = $field . '_' . $fallbackLang;
+
+        if (!empty($row[$fallbackField])) {
+            return (string)$row[$fallbackField];
+        }
+    }
+
+    return (string)($row[$field] ?? '');
+}
+
+/**
+ * Генерирует URL для переключения языка,
+ * сохраняя текущую страницу и остальные GET-параметры.
+ */
+function langUrl(string $lang): string
+{
+    $params = $_GET;
+    $params['lang'] = $lang;
+
+    $path = strtok($_SERVER['REQUEST_URI'], '?');
+    return $path . '?' . http_build_query($params);
 }

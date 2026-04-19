@@ -11,19 +11,46 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $action = trim((string)($_POST['action'] ?? ''));
 
     if ($action === 'create') {
-        $name = trim((string)($_POST['name'] ?? ''));
-        $description = trim((string)($_POST['description'] ?? ''));
+        $nameRu = trim((string)($_POST['name_ru'] ?? ''));
+        $nameEn = trim((string)($_POST['name_en'] ?? ''));
+        $nameEt = trim((string)($_POST['name_et'] ?? ''));
 
-        if ($name === '') {
+        $descRu = trim((string)($_POST['description_ru'] ?? ''));
+        $descEn = trim((string)($_POST['description_en'] ?? ''));
+        $descEt = trim((string)($_POST['description_et'] ?? ''));
+
+        if ($nameRu === '' && $nameEn === '' && $nameEt === '') {
             $errors[] = t('admin.categories.name_error');
         }
 
+        $legacyName = $nameRu !== '' ? $nameRu : ($nameEn !== '' ? $nameEn : $nameEt);
+        $legacyDesc = $descRu !== '' ? $descRu : ($descEn !== '' ? $descEn : $descEt);
+
         if (!$errors) {
             $stmt = $mysqli->prepare("
-                INSERT INTO categories (name, description)
-                VALUES (?, ?)
+                INSERT INTO categories (
+                    name,
+                    name_ru,
+                    name_en,
+                    name_et,
+                    description,
+                    description_ru,
+                    description_en,
+                    description_et
+                )
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
             ");
-            $stmt->bind_param('ss', $name, $description);
+            $stmt->bind_param(
+                    'ssssssss',
+                    $legacyName,
+                    $nameRu,
+                    $nameEn,
+                    $nameEt,
+                    $legacyDesc,
+                    $descRu,
+                    $descEn,
+                    $descEt
+            );
             $stmt->execute();
             $stmt->close();
 
@@ -41,7 +68,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         $stmt = $mysqli->prepare("
-            SELECT id, name
+            SELECT id
             FROM categories
             WHERE id = ?
             LIMIT 1
@@ -88,7 +115,13 @@ $result = $mysqli->query("
     SELECT
         c.id,
         c.name,
+        c.name_ru,
+        c.name_en,
+        c.name_et,
         c.description,
+        c.description_ru,
+        c.description_en,
+        c.description_et,
         c.created_at,
         COUNT(p.id) AS products_count
     FROM categories c
@@ -117,11 +150,26 @@ $result = $mysqli->query("
         <form method="post">
             <input type="hidden" name="action" value="create">
 
-            <label for="name"><?= e(t('common.name')) ?></label>
-            <input type="text" id="name" name="name" required>
+            <h3>RU</h3>
+            <label for="name_ru">Название (RU)</label>
+            <input type="text" id="name_ru" name="name_ru">
 
-            <label for="description"><?= e(t('common.description')) ?></label>
-            <textarea id="description" name="description"></textarea>
+            <label for="description_ru">Описание (RU)</label>
+            <textarea id="description_ru" name="description_ru"></textarea>
+
+            <h3>EN</h3>
+            <label for="name_en">Name (EN)</label>
+            <input type="text" id="name_en" name="name_en">
+
+            <label for="description_en">Description (EN)</label>
+            <textarea id="description_en" name="description_en"></textarea>
+
+            <h3>ET</h3>
+            <label for="name_et">Nimi (ET)</label>
+            <input type="text" id="name_et" name="name_et">
+
+            <label for="description_et">Kirjeldus (ET)</label>
+            <textarea id="description_et" name="description_et"></textarea>
 
             <button type="submit"><?= e(t('common.add')) ?></button>
         </form>
@@ -141,8 +189,8 @@ $result = $mysqli->query("
         <?php while ($category = $result->fetch_assoc()): ?>
             <tr>
                 <td><?= (int)$category['id'] ?></td>
-                <td><?= e($category['name']) ?></td>
-                <td><?= e($category['description'] ?: t('common.none')) ?></td>
+                <td><?= e(tdb($category, 'name')) ?></td>
+                <td><?= e(tdb($category, 'description') ?: t('common.none')) ?></td>
                 <td><?= (int)$category['products_count'] ?></td>
                 <td><?= e($category['created_at']) ?></td>
                 <td>

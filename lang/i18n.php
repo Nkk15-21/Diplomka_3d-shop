@@ -34,3 +34,8 @@ function currentLang(): string
 {
     return $_SESSION['lang'] ?? 'ru';
 }
+
+function availableLanguages(): array
+{
+    return ['ru', 'en', 'et'];
+}

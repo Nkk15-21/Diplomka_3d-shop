@@ -6,7 +6,6 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 
 require_once __DIR__ . '/functions.php';
-require_once __DIR__ . '/../lang/i18n.php';
 
 $flashSuccess = getFlash('success');
 $flashError = getFlash('error');
@@ -17,7 +16,8 @@ $flashError = getFlash('error');
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= e(t('site.title')) ?></title>
-    <link rel="stylesheet" href="/3d_print_shop/css/style.css">
+    <link rel="stylesheet" href="/3d_print_shop/css/style.css?v=<?= time() ?>">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
 </head>
 <body>
 <header class="site-header">
@@ -38,9 +38,9 @@ $flashError = getFlash('error');
 
         <div class="header-right">
             <div class="lang-switcher">
-                <a href="?lang=ru" class="lang-btn <?= currentLang() === 'ru' ? 'active' : '' ?>"><?= e(t('lang.ru')) ?></a>
-                <a href="?lang=en" class="lang-btn <?= currentLang() === 'en' ? 'active' : '' ?>"><?= e(t('lang.en')) ?></a>
-                <a href="?lang=et" class="lang-btn <?= currentLang() === 'et' ? 'active' : '' ?>"><?= e(t('lang.et')) ?></a>
+                <a href="<?= e(langUrl('ru')) ?>" class="lang-btn <?= currentLang() === 'ru' ? 'active' : '' ?>">Rus</a>
+                <a href="<?= e(langUrl('en')) ?>" class="lang-btn <?= currentLang() === 'en' ? 'active' : '' ?>">Eng</a>
+                <a href="<?= e(langUrl('et')) ?>" class="lang-btn <?= currentLang() === 'et' ? 'active' : '' ?>">Est</a>
             </div>
 
             <nav class="nav nav-actions">

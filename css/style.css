@@ -154,14 +154,16 @@ ul.clean-list {
 
 .header-inner {
     display: flex;
-    justify-content: space-between;
     align-items: center;
-    gap: 20px;
-    min-height: 74px;
-    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 18px;
+    min-height: 82px;
+    flex-wrap: nowrap;
 }
 
 .logo {
+    flex: 0 0 auto;
+    white-space: nowrap;
     font-size: 24px;
     font-weight: 800;
     text-decoration: none;
@@ -171,14 +173,13 @@ ul.clean-list {
 
 .nav {
     display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
+    align-items: center;
+    gap: 8px;
 }
 
 .nav a {
     text-decoration: none;
     color: #334155;
-    padding: 10px 14px;
     border-radius: 12px;
     transition:
             background 0.2s ease,
@@ -193,9 +194,159 @@ ul.clean-list {
     transform: translateY(-1px);
 }
 
+.nav-main {
+    flex: 1 1 auto;
+    justify-content: center;
+    flex-wrap: nowrap;
+    min-width: 0;
+    gap: 6px;
+}
+
+.nav-main a {
+    white-space: nowrap;
+    padding: 8px 10px;
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.header-right {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: nowrap;
+}
+
+.nav-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: nowrap;
+}
+
+.nav-circle-btn {
+    width: 40px;
+    height: 40px;
+    min-width: 40px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 999px;
+    color: #334155;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    padding: 0;
+    transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease;
+}
+
+.nav-circle-btn:hover {
+    background: #eef2ff;
+    color: #1d4ed8;
+    transform: translateY(-1px);
+}
+
+.nav-profile-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+    color: #334155;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 999px;
+    padding: 5px 10px 5px 5px;
+    transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease;
+    max-width: 160px;
+    white-space: nowrap;
+}
+
+.nav-profile-btn:hover {
+    background: #eef2ff;
+    color: #1d4ed8;
+    transform: translateY(-1px);
+}
+
+.nav-profile-icon-wrap {
+    width: 30px;
+    height: 30px;
+    min-width: 30px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 999px;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+}
+
+.nav-profile-name {
+    font-weight: 700;
+    font-size: 14px;
+    line-height: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.nav-svg {
+    width: 18px;
+    height: 18px;
+    display: block;
+}
+
+.nav-logout-btn {
+    color: #dc2626;
+}
+
+.nav-logout-btn:hover {
+    background: #fef2f2;
+    color: #b91c1c;
+}
+
 
 /* =========================================================
-   4. HERO
+   4. LANGUAGE SWITCHER
+   ========================================================= */
+
+.lang-switcher {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 999px;
+    padding: 4px;
+    flex-wrap: nowrap;
+}
+
+.lang-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 46px;
+    height: 34px;
+    padding: 0 10px;
+    text-decoration: none;
+    color: #475467;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 700;
+    white-space: nowrap;
+    transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease;
+}
+
+.lang-btn:hover {
+    background: #eef2ff;
+    color: #1d4ed8;
+}
+
+.lang-btn.active {
+    background: #2563eb;
+    color: #ffffff;
+}
+
+
+/* =========================================================
+   5. HERO
    ========================================================= */
 
 .hero {
@@ -233,7 +384,7 @@ ul.clean-list {
 
 
 /* =========================================================
-   5. КАРТОЧКИ И СЕТКИ
+   6. КАРТОЧКИ И СЕТКИ
    ========================================================= */
 
 .grid-3 {
@@ -288,7 +439,7 @@ ul.clean-list {
 
 
 /* =========================================================
-   6. СООБЩЕНИЯ
+   7. СООБЩЕНИЯ
    ========================================================= */
 
 .message {
@@ -320,7 +471,7 @@ ul.clean-list {
 
 
 /* =========================================================
-   7. ФОРМЫ
+   8. ФОРМЫ
    ========================================================= */
 
 form {
@@ -375,7 +526,46 @@ input[type="checkbox"] {
 
 
 /* =========================================================
-   8. КНОПКИ
+   9. FILE INPUT (КАСТОМНЫЙ)
+   ========================================================= */
+
+.file-upload {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px;
+    border: 1px dashed #cbd5e1;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: 0.2s;
+    margin-bottom: 16px;
+}
+
+.file-upload:hover {
+    background: #f1f5f9;
+}
+
+.file-upload input {
+    display: none;
+}
+
+.file-upload-btn {
+    background: #2563eb;
+    color: white;
+    padding: 8px 14px;
+    border-radius: 10px;
+    font-weight: 600;
+}
+
+.file-upload-name {
+    color: #64748b;
+    font-size: 14px;
+    word-break: break-word;
+}
+
+
+/* =========================================================
+   10. КНОПКИ
    ========================================================= */
 
 button,
@@ -431,7 +621,7 @@ button:active,
 
 
 /* =========================================================
-   9. ТАБЛИЦЫ
+   11. ТАБЛИЦЫ
    ========================================================= */
 
 table {
@@ -471,7 +661,7 @@ table tr:hover td {
 
 
 /* =========================================================
-   10. FOOTER
+   12. FOOTER
    ========================================================= */
 
 .site-footer {
@@ -485,7 +675,7 @@ table tr:hover td {
 
 
 /* =========================================================
-   11. МОДАЛЬНОЕ ОКНО ПОДТВЕРЖДЕНИЯ
+   13. МОДАЛЬНОЕ ОКНО ПОДТВЕРЖДЕНИЯ
    ========================================================= */
 
 .danger-link {
@@ -578,7 +768,7 @@ table tr:hover td {
 
 
 /* =========================================================
-   12. КАЛЬКУЛЯТОР СТОИМОСТИ
+   14. КАЛЬКУЛЯТОР СТОИМОСТИ
    ========================================================= */
 
 .calculator-box {
@@ -606,7 +796,7 @@ table tr:hover td {
 
 
 /* =========================================================
-   13. СТАТУСЫ ЗАКАЗОВ
+   15. СТАТУСЫ ЗАКАЗОВ
    ========================================================= */
 
 .badge-new {
@@ -631,7 +821,7 @@ table tr:hover td {
 
 
 /* =========================================================
-   14. АДМИНКА
+   16. АДМИНКА
    ========================================================= */
 
 .admin-layout {
@@ -796,7 +986,7 @@ table tr:hover td {
 
 
 /* =========================================================
-   15. ДЕЙСТВИЯ В АДМИНКЕ
+   17. ДЕЙСТВИЯ В АДМИНКЕ
    ========================================================= */
 
 .action-icon {
@@ -841,7 +1031,7 @@ table tr:hover td {
 
 
 /* =========================================================
-   16. ДОПОЛНИТЕЛЬНЫЕ БЛОКИ
+   18. ДОПОЛНИТЕЛЬНЫЕ БЛОКИ
    ========================================================= */
 
 .product-image-preview {
@@ -861,10 +1051,46 @@ table tr:hover td {
 
 
 /* =========================================================
-   17. АДАПТИВНОСТЬ
+   19. АДАПТИВНОСТЬ
    ========================================================= */
 
-@media (max-width: 900px) {
+@media (max-width: 1280px) {
+    .nav-main a {
+        padding: 8px 8px;
+        font-size: 13px;
+    }
+
+    .logo {
+        font-size: 22px;
+    }
+
+    .header-inner {
+        gap: 14px;
+    }
+}
+
+@media (max-width: 1080px) {
+    .header-inner {
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 12px;
+        padding-top: 10px;
+        padding-bottom: 10px;
+    }
+
+    .nav-main {
+        order: 3;
+        width: 100%;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+
+    .header-right {
+        order: 2;
+        justify-content: center;
+        width: auto;
+    }
+
     .admin-layout {
         flex-direction: column;
     }
@@ -907,183 +1133,32 @@ table tr:hover td {
     }
 }
 
-/* =========================================================
-   18. HEADER ACTIONS
-   ========================================================= */
-
-.header-inner {
-    display: grid;
-    grid-template-columns: auto 1fr auto;
-    align-items: center;
-    gap: 24px;
-    min-height: 82px;
-}
-
-.nav-main {
-    justify-content: center;
-}
-
-.nav-actions {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    flex-wrap: nowrap;
-}
-
-.nav-circle-btn {
-    width: 42px;
-    height: 42px;
-    min-width: 42px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 999px;
-    color: #334155;
-    background: #f8fafc;
-    border: 1px solid #e2e8f0;
-    padding: 0;
-    transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease;
-}
-
-.nav-circle-btn:hover {
-    background: #eef2ff;
-    color: #1d4ed8;
-    transform: translateY(-1px);
-}
-
-.nav-profile-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 10px;
-    text-decoration: none;
-    color: #334155;
-    background: #f8fafc;
-    border: 1px solid #e2e8f0;
-    border-radius: 999px;
-    padding: 6px 12px 6px 6px;
-    transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease;
-    max-width: 180px;
-}
-
-.nav-profile-btn:hover {
-    background: #eef2ff;
-    color: #1d4ed8;
-    transform: translateY(-1px);
-}
-
-.nav-profile-icon-wrap {
-    width: 34px;
-    height: 34px;
-    min-width: 34px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 999px;
-    background: #ffffff;
-    border: 1px solid #e2e8f0;
-}
-
-.nav-profile-name {
-    font-weight: 700;
-    font-size: 14px;
-    line-height: 1;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.nav-svg {
-    width: 20px;
-    height: 20px;
-    display: block;
-}
-
-.nav-logout-btn {
-    color: #dc2626;
-}
-
-.nav-logout-btn:hover {
-    background: #fef2f2;
-    color: #b91c1c;
-}
-
-@media (max-width: 1100px) {
-    .header-inner {
-        grid-template-columns: 1fr;
-        justify-items: center;
-        gap: 14px;
-        padding-top: 10px;
-        padding-bottom: 10px;
-    }
-
-    .nav-main {
-        justify-content: center;
-    }
-
-    .nav-actions {
-        justify-content: center;
-    }
-}
-
 @media (max-width: 700px) {
     .nav-profile-name {
         display: none;
     }
 
     .nav-profile-btn {
-        padding-right: 6px;
+        padding-right: 5px;
     }
-}
 
-/* =========================================================
-   19. LANGUAGE SWITCHER
-   ========================================================= */
+    .lang-btn {
+        min-width: 42px;
+        font-size: 12px;
+        padding: 0 8px;
+    }
 
-.header-right {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    flex-wrap: wrap;
-    justify-content: flex-end;
-}
+    .hero-actions,
+    .inline-actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
 
-.lang-switcher {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    background: #f8fafc;
-    border: 1px solid #e2e8f0;
-    border-radius: 999px;
-    padding: 4px;
-}
+    .confirm-modal__actions {
+        flex-direction: column;
+    }
 
-.lang-btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-width: 48px;
-    height: 34px;
-    padding: 0 10px;
-    text-decoration: none;
-    color: #475467;
-    border-radius: 999px;
-    font-size: 13px;
-    font-weight: 700;
-    transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease;
-}
-
-.lang-btn:hover {
-    background: #eef2ff;
-    color: #1d4ed8;
-}
-
-.lang-btn.active {
-    background: #2563eb;
-    color: #ffffff;
-}
-
-@media (max-width: 1100px) {
-    .header-right {
-        justify-content: center;
+    .confirm-modal__actions .btn {
+        width: 100%;
     }
 }

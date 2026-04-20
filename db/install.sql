@@ -101,13 +101,18 @@ CREATE TABLE custom_orders (
                                        ON UPDATE CASCADE
 );
 
+CREATE INDEX idx_products_active ON products(is_active);
+CREATE INDEX idx_orders_status ON orders(status);
+
 CREATE TABLE contacts (
                           id INT AUTO_INCREMENT PRIMARY KEY,
                           name VARCHAR(100) NOT NULL,
                           email VARCHAR(150) NOT NULL,
                           subject VARCHAR(150) DEFAULT NULL,
                           message TEXT NOT NULL,
+                          is_read TINYINT(1) DEFAULT 0,
                           created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+
 );
 
 INSERT INTO categories (name, description) VALUES

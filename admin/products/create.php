@@ -34,8 +34,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     $price = isset($_POST['price']) ? (float)$_POST['price'] : 0;
     $categoryId = isset($_POST['category_id']) && $_POST['category_id'] !== ''
-            ? (int)$_POST['category_id']
-            : null;
+        ? (int)$_POST['category_id']
+        : null;
     $isActive = isset($_POST['is_active']) ? 1 : 0;
 
     if ($nameRu === '' && $nameEn === '' && $nameEt === '') {
@@ -113,23 +113,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         ");
 
         $stmt->bind_param(
-                'issssssssssssdsi',
-                $categoryId,
-                $legacyName,
-                $nameRu,
-                $nameEn,
-                $nameEt,
-                $legacyShort,
-                $shortRu,
-                $shortEn,
-                $shortEt,
-                $legacyDesc,
-                $descRu,
-                $descEn,
-                $descEt,
-                $price,
-                $imagePath,
-                $isActive
+            'issssssssssssdsi',
+            $categoryId,
+            $legacyName,
+            $nameRu,
+            $nameEn,
+            $nameEt,
+            $legacyShort,
+            $shortRu,
+            $shortEn,
+            $shortEt,
+            $legacyDesc,
+            $descRu,
+            $descEn,
+            $descEt,
+            $price,
+            $imagePath,
+            $isActive
         );
 
         if ($stmt->execute()) {
@@ -197,7 +197,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <?php foreach ($categories as $category): ?>
                 <option
                         value="<?= (int)$category['id'] ?>"
-                        <?= old('category_id') === (string)$category['id'] ? 'selected' : '' ?>
+                    <?= old('category_id') === (string)$category['id'] ? 'selected' : '' ?>
                 >
                     <?= e(tdb($category, 'name')) ?>
                 </option>
@@ -212,7 +212,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     type="checkbox"
                     name="is_active"
                     value="1"
-                    <?= old('is_active', '1') === '1' ? 'checked' : '' ?>
+                <?= old('is_active', '1') === '1' ? 'checked' : '' ?>
                     style="width: auto; margin: 0;"
             >
             <?= e(t('admin.products.active_label')) ?>

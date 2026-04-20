@@ -89,12 +89,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 VALUES (?, ?, ?, ?, ?, 'new')
             ");
             $stmt->bind_param(
-                    'isssd',
-                    $userId,
-                    $user['name'],
-                    $user['email'],
-                    $user['phone'],
-                    $totalAmount
+                'isssd',
+                $userId,
+                $user['name'],
+                $user['email'],
+                $user['phone'],
+                $totalAmount
             );
             $stmt->execute();
             $orderId = $stmt->insert_id;
@@ -112,11 +112,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 VALUES (?, ?, ?, ?)
             ");
             $stmt->bind_param(
-                    'iiid',
-                    $orderId,
-                    $productId,
-                    $quantity,
-                    $unitPrice
+                'iiid',
+                $orderId,
+                $productId,
+                $quantity,
+                $unitPrice
             );
             $stmt->execute();
             $stmt->close();
@@ -124,15 +124,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             require_once __DIR__ . '/mail/mailer.php';
 
             $mailBody = renderMailTemplate('order_created.php', [
-                    'orderId' => $orderId,
-                    'customerName' => $user['name'],
-                    'customerEmail' => $user['email'],
-                    'customerPhone' => $user['phone'],
-                    'productName' => tdb($product, 'name'),
-                    'quantity' => $quantity,
-                    'unitPrice' => $unitPrice,
-                    'totalAmount' => $totalAmount,
-                    'createdAt' => date('Y-m-d H:i:s'),
+                'orderId' => $orderId,
+                'customerName' => $user['name'],
+                'customerEmail' => $user['email'],
+                'customerPhone' => $user['phone'],
+                'productName' => tdb($product, 'name'),
+                'quantity' => $quantity,
+                'unitPrice' => $unitPrice,
+                'totalAmount' => $totalAmount,
+                'createdAt' => date('Y-m-d H:i:s'),
             ]);
 
             sendMailToAdmin('New product order / Новый заказ товара #' . $orderId, $mailBody);
@@ -146,10 +146,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 require_once __DIR__ . '/includes/header.php';
 
 $categoryTitle = tdb([
-        'name_ru' => $product['category_name_ru'] ?? '',
-        'name_en' => $product['category_name_en'] ?? '',
-        'name_et' => $product['category_name_et'] ?? '',
-        'name' => $product['category_name'] ?? '',
+    'name_ru' => $product['category_name_ru'] ?? '',
+    'name_en' => $product['category_name_en'] ?? '',
+    'name_et' => $product['category_name_et'] ?? '',
+    'name' => $product['category_name'] ?? '',
 ], 'name');
 ?>
 

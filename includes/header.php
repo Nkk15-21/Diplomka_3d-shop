@@ -9,6 +9,37 @@ require_once __DIR__ . '/functions.php';
 
 $flashSuccess = getFlash('success');
 $flashError = getFlash('error');
+
+$wishlistCount = 0;
+$cartCount = 0;
+
+if (!empty($_SESSION['user_id']) && isset($mysqli) && $mysqli instanceof mysqli) {
+    $userId = (int)$_SESSION['user_id'];
+
+    $stmt = $mysqli->prepare("
+        SELECT COUNT(*) AS cnt
+        FROM wishlist
+        WHERE user_id = ?
+    ");
+    if ($stmt) {
+        $stmt->bind_param('i', $userId);
+        $stmt->execute();
+        $wishlistCount = (int)($stmt->get_result()->fetch_assoc()['cnt'] ?? 0);
+        $stmt->close();
+    }
+
+    $stmt = $mysqli->prepare("
+        SELECT COUNT(*) AS cnt
+        FROM cart_items
+        WHERE user_id = ?
+    ");
+    if ($stmt) {
+        $stmt->bind_param('i', $userId);
+        $stmt->execute();
+        $cartCount = (int)($stmt->get_result()->fetch_assoc()['cnt'] ?? 0);
+        $stmt->close();
+    }
+}
 ?>
 <!DOCTYPE html>
 <html lang="<?= e(currentLang()) ?>">
@@ -17,7 +48,6 @@ $flashError = getFlash('error');
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= e(t('site.title')) ?></title>
     <link rel="stylesheet" href="/3d_print_shop/css/style.css?v=<?= time() ?>">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
 </head>
 <body>
 <header class="site-header">
@@ -29,7 +59,7 @@ $flashError = getFlash('error');
             <a href="/3d_print_shop/catalog.php"><?= e(t('nav.catalog')) ?></a>
             <a href="/3d_print_shop/custom_order.php"><?= e(t('nav.custom_order')) ?></a>
             <a href="/3d_print_shop/services.php"><?= e(t('nav.services')) ?></a>
-            <!--<a href="/3d_print_shop/blog.php"><?= e(t('nav.blog')) ?></a>-->
+            <a href="/3d_print_shop/blog.php"><?= e(t('nav.blog')) ?></a>
 
             <?php if (!empty($_SESSION['user_id']) && (($_SESSION['user_role'] ?? '') === 'admin')): ?>
                 <a href="/3d_print_shop/admin/index.php"><?= e(t('nav.admin')) ?></a>
@@ -52,6 +82,30 @@ $flashError = getFlash('error');
                 </a>
 
                 <?php if (!empty($_SESSION['user_id'])): ?>
+                    <a href="/3d_print_shop/wishlist.php" class="nav-circle-btn" title="Избранное" aria-label="Избранное" style="position:relative;">
+                        <svg viewBox="0 0 24 24" class="nav-svg" aria-hidden="true">
+                            <path d="M12 21s-7-4.35-9-8.5C1.3 8.9 3.1 5 6.7 5c2 0 3.2 1.1 4.3 2.5C12.1 6.1 13.3 5 15.3 5 18.9 5 20.7 8.9 21 12.5 19 16.65 12 21 12 21z" fill="none" stroke="currentColor" stroke-width="2"/>
+                        </svg>
+                        <?php if ($wishlistCount > 0): ?>
+                            <span style="position:absolute; top:-4px; right:-4px; background:#dc2626; color:#fff; min-width:18px; height:18px; border-radius:999px; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:800; padding:0 5px;">
+                                <?= $wishlistCount ?>
+                            </span>
+                        <?php endif; ?>
+                    </a>
+
+                    <a href="/3d_print_shop/cart.php" class="nav-circle-btn" title="Корзина" aria-label="Корзина" style="position:relative;">
+                        <svg viewBox="0 0 24 24" class="nav-svg" aria-hidden="true">
+                            <circle cx="9" cy="20" r="1.7" fill="currentColor"/>
+                            <circle cx="18" cy="20" r="1.7" fill="currentColor"/>
+                            <path d="M3 4h2l2.2 10.2a1 1 0 0 0 1 .8H18a1 1 0 0 0 1-.8L21 8H7" fill="none" stroke="currentColor" stroke-width="2"/>
+                        </svg>
+                        <?php if ($cartCount > 0): ?>
+                            <span style="position:absolute; top:-4px; right:-4px; background:#2563eb; color:#fff; min-width:18px; height:18px; border-radius:999px; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:800; padding:0 5px;">
+                                <?= $cartCount ?>
+                            </span>
+                        <?php endif; ?>
+                    </a>
+
                     <a href="/3d_print_shop/profile.php" class="nav-profile-btn" title="<?= e(t('nav.profile')) ?>">
                         <span class="nav-profile-icon-wrap">
                             <svg viewBox="0 0 24 24" class="nav-svg" aria-hidden="true">

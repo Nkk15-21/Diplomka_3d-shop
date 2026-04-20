@@ -138,7 +138,11 @@ require_once __DIR__ . '/includes/header.php';
             <p><strong>Товаров:</strong> <?= count($cartItems) ?></p>
             <p><strong>Общая сумма:</strong></p>
             <div class="calculator-price">€<?= number_format($total, 2) ?></div>
-            <p class="small-text">Оформление заказа из корзины можно добавить следующим шагом.</p>
+
+            <div style="margin-top:18px; display:flex; flex-direction:column; gap:10px;">
+                <a class="btn" href="/3d_print_shop/checkout_cart.php">Оформить заказ</a>
+                <a class="btn btn-secondary" href="/3d_print_shop/catalog.php">Продолжить покупки</a>
+            </div>
         </div>
     </div>
 <?php endif; ?>

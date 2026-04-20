@@ -4,6 +4,7 @@ declare(strict_types=1);
 require_once __DIR__ . '/includes/auth.php';
 
 $productId = isset($_GET['id']) ? (int)$_GET['id'] : 0;
+$userId = !empty($_SESSION['user_id']) ? (int)$_SESSION['user_id'] : 0;
 
 if ($productId <= 0) {
     setFlash('error', t('product.not_found'));
@@ -28,7 +29,6 @@ $stmt = $mysqli->prepare("
         p.price,
         p.image_path,
         p.is_active,
-
         c.name AS category_name,
         c.name_ru AS category_name_ru,
         c.name_en AS category_name_en,
@@ -68,6 +68,20 @@ if (!$productImages && !empty($product['image_path'])) {
     ];
 }
 
+$isWishlisted = false;
+if ($userId > 0) {
+    $stmt = $mysqli->prepare("
+        SELECT id
+        FROM wishlist
+        WHERE user_id = ? AND product_id = ?
+        LIMIT 1
+    ");
+    $stmt->bind_param('ii', $userId, $productId);
+    $stmt->execute();
+    $isWishlisted = (bool)$stmt->get_result()->fetch_assoc();
+    $stmt->close();
+}
+
 $errors = [];
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -80,7 +94,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     if (!$errors) {
-        $userId = (int)$_SESSION['user_id'];
+        $actualUserId = (int)$_SESSION['user_id'];
 
         $stmt = $mysqli->prepare("
             SELECT id, name, email, phone
@@ -88,7 +102,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             WHERE id = ?
             LIMIT 1
         ");
-        $stmt->bind_param('i', $userId);
+        $stmt->bind_param('i', $actualUserId);
         $stmt->execute();
         $user = $stmt->get_result()->fetch_assoc();
         $stmt->close();
@@ -112,7 +126,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             ");
             $stmt->bind_param(
                 'isssd',
-                $userId,
+                $actualUserId,
                 $user['name'],
                 $user['email'],
                 $user['phone'],
@@ -236,6 +250,15 @@ $categoryTitle = tdb([
             <strong><?= e(t('product.price')) ?>:</strong>
             €<?= number_format((float)$product['price'], 2) ?>
         </p>
+
+        <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:18px;">
+            <?php if ($userId > 0): ?>
+                <a class="btn btn-secondary" href="/3d_print_shop/add_to_cart.php?id=<?= (int)$product['id'] ?>">В корзину</a>
+                <a class="btn <?= $isWishlisted ? 'btn-danger' : 'btn-secondary' ?>" href="/3d_print_shop/toggle_wishlist.php?id=<?= (int)$product['id'] ?>">
+                    <?= $isWishlisted ? 'Убрать из избранного' : 'Добавить в избранное' ?>
+                </a>
+            <?php endif; ?>
+        </div>
 
         <?php if (isLoggedIn()): ?>
             <form method="post">

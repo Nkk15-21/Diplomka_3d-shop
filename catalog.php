@@ -3,6 +3,25 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/includes/auth.php';
 
+$userId = !empty($_SESSION['user_id']) ? (int)$_SESSION['user_id'] : 0;
+
+$wishlistProductIds = [];
+if ($userId > 0) {
+    $stmt = $mysqli->prepare("
+        SELECT product_id
+        FROM wishlist
+        WHERE user_id = ?
+    ");
+    $stmt->bind_param('i', $userId);
+    $stmt->execute();
+    $wishlistRows = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+    $stmt->close();
+
+    foreach ($wishlistRows as $row) {
+        $wishlistProductIds[] = (int)$row['product_id'];
+    }
+}
+
 $result = $mysqli->query("
     SELECT
         p.id,
@@ -20,7 +39,6 @@ $result = $mysqli->query("
         p.description_et,
         p.price,
         p.image_path,
-
         (
             SELECT pi.image_path
             FROM product_images pi
@@ -44,8 +62,10 @@ require_once __DIR__ . '/includes/header.php';
 <?php if ($result && $result->num_rows > 0): ?>
     <div class="product-list">
         <?php while ($product = $result->fetch_assoc()): ?>
-            <?php $imageToShow = $product['gallery_main_image'] ?: $product['image_path']; ?>
-
+            <?php
+            $imageToShow = $product['gallery_main_image'] ?: $product['image_path'];
+            $isWishlisted = in_array((int)$product['id'], $wishlistProductIds, true);
+            ?>
             <div class="product-card">
                 <?php if (!empty($imageToShow)): ?>
                     <img
@@ -62,9 +82,23 @@ require_once __DIR__ . '/includes/header.php';
 
                 <div class="price">€<?= number_format((float)$product['price'], 2) ?></div>
 
-                <a class="btn" href="/3d_print_shop/product.php?id=<?= (int)$product['id'] ?>">
-                    <?= e(t('catalog.more')) ?>
-                </a>
+                <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                    <a class="btn" href="/3d_print_shop/product.php?id=<?= (int)$product['id'] ?>">
+                        <?= e(t('catalog.more')) ?>
+                    </a>
+
+                    <?php if ($userId > 0): ?>
+                        <a class="btn btn-secondary" href="/3d_print_shop/add_to_cart.php?id=<?= (int)$product['id'] ?>">
+                            В корзину
+                        </a>
+
+                        <a class="btn <?= $isWishlisted ? 'btn-danger' : 'btn-secondary' ?>" href="/3d_print_shop/toggle_wishlist.php?id=<?= (int)$product['id'] ?>">
+                            <?= $isWishlisted ? 'Убрать ♥' : 'В избранное' ?>
+                        </a>
+                    <?php else: ?>
+                        <a class="btn btn-secondary" href="/3d_print_shop/login.php">Войти для заказа</a>
+                    <?php endif; ?>
+                </div>
             </div>
         <?php endwhile; ?>
     </div>

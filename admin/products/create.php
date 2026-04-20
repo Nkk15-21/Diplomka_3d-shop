@@ -50,41 +50,57 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $legacyShort = $shortRu !== '' ? $shortRu : ($shortEn !== '' ? $shortEn : $shortEt);
     $legacyDesc = $descRu !== '' ? $descRu : ($descEn !== '' ? $descEn : $descEt);
 
-    $imagePath = null;
+    $uploadedImages = [];
+    $mainImagePath = null;
 
-    if (isset($_FILES['image']) && $_FILES['image']['error'] !== UPLOAD_ERR_NO_FILE) {
-        if ($_FILES['image']['error'] !== UPLOAD_ERR_OK) {
-            $errors[] = t('admin.products.image_upload_error');
-        } else {
-            $allowedExtensions = ['jpg', 'jpeg', 'png', 'webp'];
-            $originalName = (string)$_FILES['image']['name'];
-            $tmpPath = (string)$_FILES['image']['tmp_name'];
-            $fileSize = (int)$_FILES['image']['size'];
+    if (isset($_FILES['images']) && !empty($_FILES['images']['name'][0])) {
+        $allowedExtensions = ['jpg', 'jpeg', 'png', 'webp'];
+        $uploadDir = __DIR__ . '/../../uploads/images/';
+
+        if (!is_dir($uploadDir)) {
+            mkdir($uploadDir, 0777, true);
+        }
+
+        foreach ($_FILES['images']['name'] as $index => $originalName) {
+            $originalName = (string)$originalName;
+            $tmpPath = (string)($_FILES['images']['tmp_name'][$index] ?? '');
+            $errorCode = (int)($_FILES['images']['error'][$index] ?? UPLOAD_ERR_NO_FILE);
+            $fileSize = (int)($_FILES['images']['size'][$index] ?? 0);
+
+            if ($errorCode === UPLOAD_ERR_NO_FILE) {
+                continue;
+            }
+
+            if ($errorCode !== UPLOAD_ERR_OK) {
+                $errors[] = t('admin.products.image_upload_error');
+                continue;
+            }
+
             $extension = strtolower(pathinfo($originalName, PATHINFO_EXTENSION));
 
             if (!in_array($extension, $allowedExtensions, true)) {
                 $errors[] = t('admin.products.image_type_error');
+                continue;
             }
 
             if ($fileSize > 5 * 1024 * 1024) {
                 $errors[] = t('admin.products.image_size_error');
+                continue;
             }
 
-            if (!$errors) {
-                $uploadDir = __DIR__ . '/../../uploads/images/';
+            $newFileName = uniqid('product_', true) . '.' . $extension;
+            $destination = $uploadDir . $newFileName;
 
-                if (!is_dir($uploadDir)) {
-                    mkdir($uploadDir, 0777, true);
-                }
+            if (!move_uploaded_file($tmpPath, $destination)) {
+                $errors[] = t('admin.products.image_save_error');
+                continue;
+            }
 
-                $newFileName = uniqid('product_', true) . '.' . $extension;
-                $destination = $uploadDir . $newFileName;
+            $savedPath = 'uploads/images/' . $newFileName;
+            $uploadedImages[] = $savedPath;
 
-                if (!move_uploaded_file($tmpPath, $destination)) {
-                    $errors[] = t('admin.products.image_save_error');
-                } else {
-                    $imagePath = 'uploads/images/' . $newFileName;
-                }
+            if ($mainImagePath === null) {
+                $mainImagePath = $savedPath;
             }
         }
     }
@@ -128,12 +144,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $descEn,
             $descEt,
             $price,
-            $imagePath,
+            $mainImagePath,
             $isActive
         );
 
         if ($stmt->execute()) {
+            $productId = $stmt->insert_id;
             $stmt->close();
+
+            if ($uploadedImages) {
+                foreach ($uploadedImages as $index => $imagePath) {
+                    $isMain = $index === 0 ? 1 : 0;
+
+                    $imgStmt = $mysqli->prepare("
+                        INSERT INTO product_images (product_id, image_path, is_main)
+                        VALUES (?, ?, ?)
+                    ");
+                    $imgStmt->bind_param('isi', $productId, $imagePath, $isMain);
+                    $imgStmt->execute();
+                    $imgStmt->close();
+                }
+            }
+
             setFlash('success', t('admin.products.create_success'));
             redirect('/3d_print_shop/admin/products/index.php');
         } else {
@@ -204,8 +236,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <?php endforeach; ?>
         </select>
 
-        <label for="image"><?= e(t('common.file')) ?></label>
-        <input type="file" id="image" name="image" accept=".jpg,.jpeg,.png,.webp">
+        <label for="images">Фотографии товара</label>
+        <input type="file" id="images" name="images[]" accept=".jpg,.jpeg,.png,.webp" multiple>
 
         <label style="display: flex; align-items: center; gap: 10px; font-weight: 600;">
             <input

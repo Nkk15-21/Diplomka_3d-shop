@@ -18,10 +18,16 @@ $user = $stmt->get_result()->fetch_assoc();
 $stmt->close();
 
 $stmt = $mysqli->prepare("
-    SELECT *
-    FROM orders
-    WHERE user_id = ?
-    ORDER BY created_at DESC
+    SELECT
+        o.*,
+        os.code AS status_code,
+        os.name_ru AS status_name_ru,
+        os.name_en AS status_name_en,
+        os.name_et AS status_name_et
+    FROM orders o
+    LEFT JOIN order_statuses os ON os.id = o.status_id
+    WHERE o.user_id = ?
+    ORDER BY o.created_at DESC
 ");
 $stmt->bind_param('i', $userId);
 $stmt->execute();
@@ -39,7 +45,7 @@ $stmt->execute();
 $customOrders = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
 $stmt->close();
 
-function getStatusBadgeTranslated(string $status): string
+function getStatusBadgeClassProfile(string $status): string
 {
     return match ($status) {
         'new' => 'badge badge-new',
@@ -73,12 +79,21 @@ require_once __DIR__ . '/includes/header.php';
     <div class="message info"><?= e(t('profile.no_orders')) ?></div>
 <?php else: ?>
     <?php foreach ($orders as $order): ?>
+        <?php
+        $statusCode = $order['status_code'] ?: $order['status'] ?: 'new';
+        $statusTitle = tdb([
+            'name_ru' => $order['status_name_ru'] ?? '',
+            'name_en' => $order['status_name_en'] ?? '',
+            'name_et' => $order['status_name_et'] ?? '',
+            'name' => $statusCode,
+        ], 'name');
+        ?>
         <div class="card" style="margin-bottom: 20px;">
             <p>
                 <strong>#<?= (int)$order['id'] ?></strong>
                 —
-                <span class="<?= getStatusBadgeTranslated($order['status']) ?>">
-                    <?= e(t('status.' . $order['status'])) ?>
+                <span class="<?= getStatusBadgeClassProfile($statusCode) ?>">
+                    <?= e($statusTitle) ?>
                 </span>
             </p>
 
@@ -90,7 +105,13 @@ require_once __DIR__ . '/includes/header.php';
             <ul class="clean-list">
                 <?php
                 $stmt = $mysqli->prepare("
-                    SELECT oi.quantity, oi.unit_price, p.name
+                    SELECT
+                        oi.quantity,
+                        oi.unit_price,
+                        p.name,
+                        p.name_ru,
+                        p.name_en,
+                        p.name_et
                     FROM order_items oi
                     JOIN products p ON p.id = oi.product_id
                     WHERE oi.order_id = ?
@@ -103,7 +124,7 @@ require_once __DIR__ . '/includes/header.php';
 
                 <?php foreach ($items as $item): ?>
                     <li>
-                        <?= e($item['name']) ?> —
+                        <?= e(tdb($item, 'name')) ?> —
                         <?= (int)$item['quantity'] ?> × €<?= number_format((float)$item['unit_price'], 2) ?>
                     </li>
                 <?php endforeach; ?>
@@ -122,7 +143,7 @@ require_once __DIR__ . '/includes/header.php';
             <p>
                 <strong>#<?= (int)$order['id'] ?></strong>
                 —
-                <span class="<?= getStatusBadgeTranslated($order['status']) ?>">
+                <span class="<?= getStatusBadgeClassProfile($order['status']) ?>">
                     <?= e(t('status.' . $order['status'])) ?>
                 </span>
             </p>

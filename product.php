@@ -28,6 +28,7 @@ $stmt = $mysqli->prepare("
         p.price,
         p.image_path,
         p.is_active,
+
         c.name AS category_name,
         c.name_ru AS category_name_ru,
         c.name_en AS category_name_en,
@@ -45,6 +46,26 @@ $stmt->close();
 if (!$product) {
     setFlash('error', t('product.not_found'));
     redirect('/3d_print_shop/catalog.php');
+}
+
+$imagesStmt = $mysqli->prepare("
+    SELECT image_path, is_main
+    FROM product_images
+    WHERE product_id = ?
+    ORDER BY is_main DESC, id ASC
+");
+$imagesStmt->bind_param('i', $productId);
+$imagesStmt->execute();
+$productImages = $imagesStmt->get_result()->fetch_all(MYSQLI_ASSOC);
+$imagesStmt->close();
+
+if (!$productImages && !empty($product['image_path'])) {
+    $productImages = [
+        [
+            'image_path' => $product['image_path'],
+            'is_main' => 1,
+        ]
+    ];
 }
 
 $errors = [];
@@ -84,9 +105,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     customer_email,
                     customer_phone,
                     total_amount,
-                    status
+                    status,
+                    status_id
                 )
-                VALUES (?, ?, ?, ?, ?, 'new')
+                VALUES (?, ?, ?, ?, ?, 'new', 1)
             ");
             $stmt->bind_param(
                 'isssd',
@@ -118,6 +140,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $quantity,
                 $unitPrice
             );
+            $stmt->execute();
+            $stmt->close();
+
+            $stmt = $mysqli->prepare("
+                INSERT INTO order_status_history (order_id, status_id)
+                VALUES (?, 1)
+            ");
+            $stmt->bind_param('i', $orderId);
             $stmt->execute();
             $stmt->close();
 
@@ -169,13 +199,26 @@ $categoryTitle = tdb([
 <?php endif; ?>
 
     <div class="card">
-        <?php if (!empty($product['image_path'])): ?>
+        <?php if ($productImages): ?>
             <div style="margin-bottom: 20px;">
+                <?php $mainImage = $productImages[0]['image_path']; ?>
                 <img
-                        src="/3d_print_shop/<?= e($product['image_path']) ?>"
+                        src="/3d_print_shop/<?= e($mainImage) ?>"
                         alt="<?= e(tdb($product, 'name')) ?>"
-                        style="max-width: 100%; border-radius: 16px;"
+                        style="max-width: 100%; border-radius: 16px; margin-bottom: 14px;"
                 >
+
+                <?php if (count($productImages) > 1): ?>
+                    <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                        <?php foreach ($productImages as $image): ?>
+                            <img
+                                    src="/3d_print_shop/<?= e($image['image_path']) ?>"
+                                    alt="<?= e(tdb($product, 'name')) ?>"
+                                    style="width: 90px; height: 90px; object-fit: cover; border-radius: 12px; border: 1px solid #e5e7eb;"
+                            >
+                        <?php endforeach; ?>
+                    </div>
+                <?php endif; ?>
             </div>
         <?php endif; ?>
 

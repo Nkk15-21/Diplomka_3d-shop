@@ -7,9 +7,34 @@ requireLogin();
 $userId = (int)$_SESSION['user_id'];
 $productId = isset($_GET['id']) ? (int)$_GET['id'] : 0;
 
+$redirect = trim((string)($_GET['redirect'] ?? ''));
+$allowedRedirects = [
+    'catalog' => '/3d_print_shop/catalog.php',
+    'wishlist' => '/3d_print_shop/wishlist.php',
+    'product' => '/3d_print_shop/product.php?id=' . $productId,
+];
+
+$redirectUrl = $allowedRedirects[$redirect] ?? '/3d_print_shop/wishlist.php';
+
 if ($productId <= 0) {
     setFlash('error', 'Некорректный товар.');
-    redirect('/3d_print_shop/catalog.php');
+    redirect($redirectUrl);
+}
+
+$stmt = $mysqli->prepare("
+    SELECT id
+    FROM products
+    WHERE id = ? AND is_active = 1
+    LIMIT 1
+");
+$stmt->bind_param('i', $productId);
+$stmt->execute();
+$product = $stmt->get_result()->fetch_assoc();
+$stmt->close();
+
+if (!$product) {
+    setFlash('error', 'Товар не найден.');
+    redirect($redirectUrl);
 }
 
 $stmt = $mysqli->prepare("
@@ -45,4 +70,4 @@ if ($existing) {
     setFlash('success', 'Товар добавлен в избранное.');
 }
 
-redirect('/3d_print_shop/wishlist.php');
+redirect($redirectUrl);

@@ -5,44 +5,83 @@ require_once __DIR__ . '/includes/auth.php';
 requireLogin();
 
 $userId = (int)$_SESSION['user_id'];
-$productId = isset($_GET['id']) ? (int)$_GET['id'] : 0;
-
-if ($productId <= 0) {
-    setFlash('error', 'Некорректный товар.');
-    redirect('/3d_print_shop/catalog.php');
-}
 
 $stmt = $mysqli->prepare("
-    SELECT id
-    FROM wishlist
-    WHERE user_id = ? AND product_id = ?
-    LIMIT 1
+    SELECT
+        w.id AS wishlist_id,
+        p.id,
+        p.name,
+        p.name_ru,
+        p.name_en,
+        p.name_et,
+        p.short_description,
+        p.short_description_ru,
+        p.short_description_en,
+        p.short_description_et,
+        p.price,
+        p.image_path,
+        (
+            SELECT pi.image_path
+            FROM product_images pi
+            WHERE pi.product_id = p.id
+            ORDER BY pi.is_main DESC, pi.id ASC
+            LIMIT 1
+        ) AS gallery_main_image
+    FROM wishlist w
+    JOIN products p ON p.id = w.product_id
+    WHERE w.user_id = ?
+    ORDER BY w.created_at DESC, w.id DESC
 ");
-$stmt->bind_param('ii', $userId, $productId);
+$stmt->bind_param('i', $userId);
 $stmt->execute();
-$existing = $stmt->get_result()->fetch_assoc();
+$wishlistItems = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
 $stmt->close();
 
-if ($existing) {
-    $stmt = $mysqli->prepare("
-        DELETE FROM wishlist
-        WHERE id = ?
-    ");
-    $stmt->bind_param('i', $existing['id']);
-    $stmt->execute();
-    $stmt->close();
+require_once __DIR__ . '/includes/header.php';
+?>
 
-    setFlash('success', 'Товар удалён из избранного.');
-} else {
-    $stmt = $mysqli->prepare("
-        INSERT INTO wishlist (user_id, product_id)
-        VALUES (?, ?)
-    ");
-    $stmt->bind_param('ii', $userId, $productId);
-    $stmt->execute();
-    $stmt->close();
+    <div class="page-header">
+        <h1>Избранное</h1>
+        <p class="small-text">Здесь собраны товары, которые ты сохранил.</p>
+    </div>
 
-    setFlash('success', 'Товар добавлен в избранное.');
-}
+<?php if (!$wishlistItems): ?>
+    <div class="message info">В избранном пока ничего нет.</div>
+<?php else: ?>
+    <div class="product-list">
+        <?php foreach ($wishlistItems as $item): ?>
+            <?php $imageToShow = $item['gallery_main_image'] ?: $item['image_path']; ?>
 
-redirect('/3d_print_shop/wishlist.php');
+            <div class="product-card">
+                <?php if (!empty($imageToShow)): ?>
+                    <img
+                        src="/3d_print_shop/<?= e($imageToShow) ?>"
+                        alt="<?= e(tdb($item, 'name')) ?>"
+                    >
+                <?php endif; ?>
+
+                <h3><?= e(tdb($item, 'name')) ?></h3>
+
+                <p><?= e(tdb($item, 'short_description') ?: t('common.none')) ?></p>
+
+                <div class="price">€<?= number_format((float)$item['price'], 2) ?></div>
+
+                <div class="product-card__actions">
+                    <a class="btn" href="/3d_print_shop/product.php?id=<?= (int)$item['id'] ?>">
+                        Подробнее
+                    </a>
+
+                    <a class="btn btn-secondary" href="/3d_print_shop/add_to_cart.php?id=<?= (int)$item['id'] ?>">
+                        В корзину
+                    </a>
+
+                    <a class="btn btn-danger" href="/3d_print_shop/toggle_wishlist.php?id=<?= (int)$item['id'] ?>&redirect=wishlist">
+                        Убрать
+                    </a>
+                </div>
+            </div>
+        <?php endforeach; ?>
+    </div>
+<?php endif; ?>
+
+<?php require_once __DIR__ . '/includes/footer.php'; ?>

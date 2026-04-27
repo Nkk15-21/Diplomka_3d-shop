@@ -82,7 +82,7 @@ require_once __DIR__ . '/includes/header.php';
 
                 <div class="price">€<?= number_format((float)$product['price'], 2) ?></div>
 
-                <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                <div class="product-card__actions">
                     <a class="btn" href="/3d_print_shop/product.php?id=<?= (int)$product['id'] ?>">
                         <?= e(t('catalog.more')) ?>
                     </a>
@@ -92,11 +92,16 @@ require_once __DIR__ . '/includes/header.php';
                             В корзину
                         </a>
 
-                        <a class="btn <?= $isWishlisted ? 'btn-danger' : 'btn-secondary' ?>" href="/3d_print_shop/toggle_wishlist.php?id=<?= (int)$product['id'] ?>">
+                        <a
+                                class="btn <?= $isWishlisted ? 'btn-danger' : 'btn-secondary' ?>"
+                                href="/3d_print_shop/toggle_wishlist.php?id=<?= (int)$product['id'] ?>&redirect=catalog"
+                        >
                             <?= $isWishlisted ? 'Убрать ♥' : 'В избранное' ?>
                         </a>
                     <?php else: ?>
-                        <a class="btn btn-secondary" href="/3d_print_shop/login.php">Войти для заказа</a>
+                        <a class="btn btn-secondary" href="/3d_print_shop/login.php">
+                            Войти для заказа
+                        </a>
                     <?php endif; ?>
                 </div>
             </div>

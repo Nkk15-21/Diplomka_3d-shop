@@ -6,6 +6,7 @@ require_once __DIR__ . '/includes/auth.php';
 $userId = !empty($_SESSION['user_id']) ? (int)$_SESSION['user_id'] : 0;
 
 $wishlistProductIds = [];
+
 if ($userId > 0) {
     $stmt = $mysqli->prepare("
         SELECT product_id
@@ -66,6 +67,7 @@ require_once __DIR__ . '/includes/header.php';
             $imageToShow = $product['gallery_main_image'] ?: $product['image_path'];
             $isWishlisted = in_array((int)$product['id'], $wishlistProductIds, true);
             ?>
+
             <div class="product-card">
                 <?php if (!empty($imageToShow)): ?>
                     <img
@@ -89,18 +91,18 @@ require_once __DIR__ . '/includes/header.php';
 
                     <?php if ($userId > 0): ?>
                         <a class="btn btn-secondary" href="/3d_print_shop/add_to_cart.php?id=<?= (int)$product['id'] ?>">
-                            В корзину
+                            <?= e(t('cart.add')) ?>
                         </a>
 
                         <a
                                 class="btn <?= $isWishlisted ? 'btn-danger' : 'btn-secondary' ?>"
                                 href="/3d_print_shop/toggle_wishlist.php?id=<?= (int)$product['id'] ?>&redirect=catalog"
                         >
-                            <?= $isWishlisted ? 'Убрать ♥' : 'В избранное' ?>
+                            <?= e($isWishlisted ? t('wishlist.remove_short') : t('wishlist.add')) ?>
                         </a>
                     <?php else: ?>
                         <a class="btn btn-secondary" href="/3d_print_shop/login.php">
-                            Войти для заказа
+                            <?= e(t('product.login_to_order')) ?>
                         </a>
                     <?php endif; ?>
                 </div>
@@ -111,5 +113,4 @@ require_once __DIR__ . '/includes/header.php';
     <div class="message info"><?= e(t('catalog.empty')) ?></div>
 <?php endif; ?>
 
-<?php
-require_once __DIR__ . '/includes/footer.php';
+<?php require_once __DIR__ . '/includes/footer.php'; ?>

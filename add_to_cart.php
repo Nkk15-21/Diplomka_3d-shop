@@ -8,7 +8,7 @@ $userId = (int)$_SESSION['user_id'];
 $productId = isset($_GET['id']) ? (int)$_GET['id'] : 0;
 
 if ($productId <= 0) {
-    setFlash('error', 'Некорректный товар.');
+    setFlash('error', t('product.not_found'));
     redirect('/3d_print_shop/catalog.php');
 }
 
@@ -24,7 +24,7 @@ $product = $stmt->get_result()->fetch_assoc();
 $stmt->close();
 
 if (!$product) {
-    setFlash('error', 'Товар не найден.');
+    setFlash('error', t('product.not_found'));
     redirect('/3d_print_shop/catalog.php');
 }
 
@@ -62,5 +62,5 @@ if ($existingItem) {
     $stmt->close();
 }
 
-setFlash('success', 'Товар добавлен в корзину.');
+setFlash('success', t('cart.added'));
 redirect('/3d_print_shop/cart.php');

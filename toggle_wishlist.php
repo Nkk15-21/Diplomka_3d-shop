@@ -8,6 +8,7 @@ $userId = (int)$_SESSION['user_id'];
 $productId = isset($_GET['id']) ? (int)$_GET['id'] : 0;
 
 $redirect = trim((string)($_GET['redirect'] ?? ''));
+
 $allowedRedirects = [
     'catalog' => '/3d_print_shop/catalog.php',
     'wishlist' => '/3d_print_shop/wishlist.php',
@@ -17,7 +18,7 @@ $allowedRedirects = [
 $redirectUrl = $allowedRedirects[$redirect] ?? '/3d_print_shop/wishlist.php';
 
 if ($productId <= 0) {
-    setFlash('error', 'Некорректный товар.');
+    setFlash('error', t('product.not_found'));
     redirect($redirectUrl);
 }
 
@@ -33,7 +34,7 @@ $product = $stmt->get_result()->fetch_assoc();
 $stmt->close();
 
 if (!$product) {
-    setFlash('error', 'Товар не найден.');
+    setFlash('error', t('product.not_found'));
     redirect($redirectUrl);
 }
 
@@ -57,7 +58,7 @@ if ($existing) {
     $stmt->execute();
     $stmt->close();
 
-    setFlash('success', 'Товар удалён из избранного.');
+    setFlash('success', t('wishlist.removed'));
 } else {
     $stmt = $mysqli->prepare("
         INSERT INTO wishlist (user_id, product_id)
@@ -67,7 +68,7 @@ if ($existing) {
     $stmt->execute();
     $stmt->close();
 
-    setFlash('success', 'Товар добавлен в избранное.');
+    setFlash('success', t('wishlist.added'));
 }
 
 redirect($redirectUrl);

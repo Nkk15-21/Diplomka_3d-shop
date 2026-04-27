@@ -41,12 +41,12 @@ require_once __DIR__ . '/includes/header.php';
 ?>
 
     <div class="page-header">
-        <h1>Избранное</h1>
-        <p class="small-text">Здесь собраны товары, которые ты сохранил.</p>
+        <h1><?= e(t('wishlist.title')) ?></h1>
+        <p class="small-text"><?= e(t('wishlist.subtitle')) ?></p>
     </div>
 
 <?php if (!$wishlistItems): ?>
-    <div class="message info">В избранном пока ничего нет.</div>
+    <div class="message info"><?= e(t('wishlist.empty')) ?></div>
 <?php else: ?>
     <div class="product-list">
         <?php foreach ($wishlistItems as $item): ?>
@@ -55,8 +55,8 @@ require_once __DIR__ . '/includes/header.php';
             <div class="product-card">
                 <?php if (!empty($imageToShow)): ?>
                     <img
-                        src="/3d_print_shop/<?= e($imageToShow) ?>"
-                        alt="<?= e(tdb($item, 'name')) ?>"
+                            src="/3d_print_shop/<?= e($imageToShow) ?>"
+                            alt="<?= e(tdb($item, 'name')) ?>"
                     >
                 <?php endif; ?>
 
@@ -68,15 +68,15 @@ require_once __DIR__ . '/includes/header.php';
 
                 <div class="product-card__actions">
                     <a class="btn" href="/3d_print_shop/product.php?id=<?= (int)$item['id'] ?>">
-                        Подробнее
+                        <?= e(t('wishlist.open')) ?>
                     </a>
 
                     <a class="btn btn-secondary" href="/3d_print_shop/add_to_cart.php?id=<?= (int)$item['id'] ?>">
-                        В корзину
+                        <?= e(t('cart.add')) ?>
                     </a>
 
                     <a class="btn btn-danger" href="/3d_print_shop/toggle_wishlist.php?id=<?= (int)$item['id'] ?>&redirect=wishlist">
-                        Убрать
+                        <?= e(t('wishlist.remove')) ?>
                     </a>
                 </div>
             </div>

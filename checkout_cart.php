@@ -43,11 +43,12 @@ $cartItems = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
 $stmt->close();
 
 if (!$cartItems) {
-    setFlash('error', 'Корзина пуста.');
+    setFlash('error', t('cart.empty_error'));
     redirect('/3d_print_shop/cart.php');
 }
 
 $totalAmount = 0.0;
+
 foreach ($cartItems as $item) {
     $totalAmount += ((float)$item['price'] * (int)$item['quantity']);
 }
@@ -67,6 +68,7 @@ try {
         )
         VALUES (?, ?, ?, ?, ?, 'new', 1)
     ");
+
     $stmt->bind_param(
         'isssd',
         $userId,
@@ -75,6 +77,7 @@ try {
         $user['phone'],
         $totalAmount
     );
+
     $stmt->execute();
     $orderId = $stmt->insert_id;
     $stmt->close();
@@ -93,6 +96,7 @@ try {
             )
             VALUES (?, ?, ?, ?)
         ");
+
         $stmt->bind_param('iiid', $orderId, $productId, $quantity, $unitPrice);
         $stmt->execute();
         $stmt->close();
@@ -119,9 +123,10 @@ try {
     require_once __DIR__ . '/mail/mailer.php';
 
     $itemsHtml = '';
+
     foreach ($cartItems as $item) {
         $itemsHtml .= '<li>' .
-            htmlspecialchars(tdb($item, 'name')) .
+            htmlspecialchars(tdb($item, 'name'), ENT_QUOTES, 'UTF-8') .
             ' — ' .
             (int)$item['quantity'] .
             ' × €' .
@@ -131,10 +136,10 @@ try {
 
     $mailBody = '
         <h2>Новый заказ из корзины</h2>
-        <p><strong>Заказ #:</strong> ' . $orderId . '</p>
-        <p><strong>Клиент:</strong> ' . htmlspecialchars($user['name']) . '</p>
-        <p><strong>Email:</strong> ' . htmlspecialchars($user['email']) . '</p>
-        <p><strong>Телефон:</strong> ' . htmlspecialchars((string)($user['phone'] ?: '—')) . '</p>
+        <p><strong>Заказ #:</strong> ' . (int)$orderId . '</p>
+        <p><strong>Клиент:</strong> ' . htmlspecialchars($user['name'], ENT_QUOTES, 'UTF-8') . '</p>
+        <p><strong>Email:</strong> ' . htmlspecialchars($user['email'], ENT_QUOTES, 'UTF-8') . '</p>
+        <p><strong>Телефон:</strong> ' . htmlspecialchars((string)($user['phone'] ?: '—'), ENT_QUOTES, 'UTF-8') . '</p>
         <p><strong>Товары:</strong></p>
         <ul>' . $itemsHtml . '</ul>
         <p><strong>Итог:</strong> €' . number_format($totalAmount, 2) . '</p>
@@ -143,10 +148,11 @@ try {
 
     sendMailToAdmin('New cart order / Новый заказ из корзины #' . $orderId, $mailBody);
 
-    setFlash('success', 'Заказ из корзины успешно оформлен.');
+    setFlash('success', t('cart.checkout_success'));
     redirect('/3d_print_shop/profile.php');
 } catch (Throwable $e) {
     $mysqli->rollback();
-    setFlash('error', 'Не удалось оформить заказ из корзины.');
+
+    setFlash('error', t('cart.checkout_error'));
     redirect('/3d_print_shop/cart.php');
 }

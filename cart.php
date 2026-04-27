@@ -19,7 +19,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt->execute();
         $stmt->close();
 
-        setFlash('success', 'Товар удалён из корзины.');
+        setFlash('success', t('cart.removed'));
         redirect('/3d_print_shop/cart.php');
     }
 
@@ -39,7 +39,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt->execute();
         $stmt->close();
 
-        setFlash('success', 'Количество обновлено.');
+        setFlash('success', t('cart.updated'));
         redirect('/3d_print_shop/cart.php');
     }
 }
@@ -73,6 +73,7 @@ $cartItems = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
 $stmt->close();
 
 $total = 0.0;
+
 foreach ($cartItems as $item) {
     $total += ((float)$item['price'] * (int)$item['quantity']);
 }
@@ -81,51 +82,56 @@ require_once __DIR__ . '/includes/header.php';
 ?>
 
     <div class="page-header">
-        <h1>Корзина</h1>
-        <p class="small-text">Ваши выбранные товары</p>
+        <h1><?= e(t('cart.title')) ?></h1>
+        <p class="small-text"><?= e(t('cart.subtitle')) ?></p>
     </div>
 
 <?php if (!$cartItems): ?>
-    <div class="message info">Корзина пока пуста.</div>
+    <div class="message info"><?= e(t('cart.empty')) ?></div>
 <?php else: ?>
     <div class="grid-3" style="grid-template-columns: 2fr 1fr; align-items:start;">
         <div>
             <?php foreach ($cartItems as $item): ?>
                 <?php $imageToShow = $item['gallery_main_image'] ?: $item['image_path']; ?>
+
                 <div class="card" style="margin-bottom:20px;">
                     <div style="display:flex; gap:16px; flex-wrap:wrap;">
                         <?php if (!empty($imageToShow)): ?>
                             <img
-                                src="/3d_print_shop/<?= e($imageToShow) ?>"
-                                alt="<?= e(tdb($item, 'name')) ?>"
-                                style="width:140px; height:140px; object-fit:cover; border-radius:14px;"
+                                    src="/3d_print_shop/<?= e($imageToShow) ?>"
+                                    alt="<?= e(tdb($item, 'name')) ?>"
+                                    style="width:140px; height:140px; object-fit:cover; border-radius:14px;"
                             >
                         <?php endif; ?>
 
                         <div style="flex:1 1 260px;">
                             <h3><?= e(tdb($item, 'name')) ?></h3>
-                            <p><strong>Цена:</strong> €<?= number_format((float)$item['price'], 2) ?></p>
+                            <p><strong><?= e(t('common.price')) ?>:</strong> €<?= number_format((float)$item['price'], 2) ?></p>
 
                             <form method="post" class="admin-inline-form" style="margin-bottom:12px;">
                                 <input type="hidden" name="action" value="update">
                                 <input type="hidden" name="cart_item_id" value="<?= (int)$item['id'] ?>">
 
-                                <label for="qty_<?= (int)$item['id'] ?>" style="margin:0;">Количество</label>
+                                <label for="qty_<?= (int)$item['id'] ?>" style="margin:0;">
+                                    <?= e(t('cart.quantity')) ?>
+                                </label>
+
                                 <input
-                                    type="number"
-                                    id="qty_<?= (int)$item['id'] ?>"
-                                    name="quantity"
-                                    min="1"
-                                    value="<?= (int)$item['quantity'] ?>"
-                                    style="max-width:100px; margin:0;"
+                                        type="number"
+                                        id="qty_<?= (int)$item['id'] ?>"
+                                        name="quantity"
+                                        min="1"
+                                        value="<?= (int)$item['quantity'] ?>"
+                                        style="max-width:100px; margin:0;"
                                 >
-                                <button type="submit">Обновить</button>
+
+                                <button type="submit"><?= e(t('cart.update')) ?></button>
                             </form>
 
                             <form method="post" style="background:none; box-shadow:none; border:none; padding:0;">
                                 <input type="hidden" name="action" value="remove">
                                 <input type="hidden" name="cart_item_id" value="<?= (int)$item['id'] ?>">
-                                <button type="submit" class="btn btn-danger">Удалить</button>
+                                <button type="submit" class="btn btn-danger"><?= e(t('cart.remove')) ?></button>
                             </form>
                         </div>
                     </div>
@@ -134,14 +140,19 @@ require_once __DIR__ . '/includes/header.php';
         </div>
 
         <div class="card">
-            <h3>Итог</h3>
-            <p><strong>Товаров:</strong> <?= count($cartItems) ?></p>
-            <p><strong>Общая сумма:</strong></p>
+            <h3><?= e(t('cart.summary')) ?></h3>
+            <p><strong><?= e(t('cart.items_count')) ?>:</strong> <?= count($cartItems) ?></p>
+            <p><strong><?= e(t('cart.total')) ?>:</strong></p>
             <div class="calculator-price">€<?= number_format($total, 2) ?></div>
 
             <div style="margin-top:18px; display:flex; flex-direction:column; gap:10px;">
-                <a class="btn" href="/3d_print_shop/checkout_cart.php">Оформить заказ</a>
-                <a class="btn btn-secondary" href="/3d_print_shop/catalog.php">Продолжить покупки</a>
+                <a class="btn" href="/3d_print_shop/checkout_cart.php">
+                    <?= e(t('cart.checkout')) ?>
+                </a>
+
+                <a class="btn btn-secondary" href="/3d_print_shop/catalog.php">
+                    <?= e(t('cart.continue')) ?>
+                </a>
             </div>
         </div>
     </div>

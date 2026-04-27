@@ -4,18 +4,26 @@ declare(strict_types=1);
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
-// PHPMailer
 require_once __DIR__ . '/../includes/phpmailer/PHPMailer.php';
 require_once __DIR__ . '/../includes/phpmailer/SMTP.php';
 require_once __DIR__ . '/../includes/phpmailer/Exception.php';
 
-// Конфиг
-$config = require __DIR__ . '/config.php';
-$mailConfig = $config['mail'];
+$configPath = __DIR__ . '/config.php';
 
-/**
- * Рендер HTML шаблона письма
- */
+if (!file_exists($configPath)) {
+    file_put_contents(
+        __DIR__ . '/mail_errors.log',
+        date('Y-m-d H:i:s') . ' | mail/config.php not found. Copy mail/config.example.php to mail/config.php' . PHP_EOL,
+        FILE_APPEND
+    );
+}
+
+$config = file_exists($configPath)
+    ? require $configPath
+    : ['mail' => []];
+
+$mailConfig = $config['mail'] ?? [];
+
 function renderMailTemplate(string $templateName, array $data = []): string
 {
     $templatePath = __DIR__ . '/templates/' . $templateName;
@@ -28,65 +36,72 @@ function renderMailTemplate(string $templateName, array $data = []): string
 
     ob_start();
     require $templatePath;
-    return ob_get_clean();
+    return (string)ob_get_clean();
 }
 
-/**
- * Отправка письма админу
- */
 function sendMailToAdmin(string $subject, string $body): bool
 {
     global $mailConfig;
 
+    $requiredKeys = [
+        'host',
+        'username',
+        'password',
+        'port',
+        'from_email',
+        'from_name',
+        'admin_email',
+    ];
+
+    foreach ($requiredKeys as $key) {
+        if (empty($mailConfig[$key])) {
+            file_put_contents(
+                __DIR__ . '/mail_errors.log',
+                date('Y-m-d H:i:s') . ' | Missing mail config key: ' . $key . PHP_EOL,
+                FILE_APPEND
+            );
+
+            return false;
+        }
+    }
+
     $mail = new PHPMailer(true);
 
     try {
-        // SMTP
         $mail->isSMTP();
-        $mail->Host = $mailConfig['host'];
+        $mail->Host = (string)$mailConfig['host'];
         $mail->SMTPAuth = true;
-        $mail->Username = $mailConfig['username'];
-        $mail->Password = $mailConfig['password'];
+        $mail->Username = (string)$mailConfig['username'];
+        $mail->Password = (string)$mailConfig['password'];
         $mail->Port = (int)$mailConfig['port'];
-
         $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
 
-        // Кодировка
         $mail->CharSet = 'UTF-8';
         $mail->Encoding = 'base64';
 
-        // От кого
         $mail->setFrom(
-            $mailConfig['from_email'],
-            $mailConfig['from_name']
+            (string)$mailConfig['from_email'],
+            (string)$mailConfig['from_name']
         );
 
-        // Кому
-        $mail->addAddress($mailConfig['admin_email']);
+        $mail->addAddress((string)$mailConfig['admin_email']);
 
-        // Контент
         $mail->isHTML(true);
         $mail->Subject = $subject;
         $mail->Body = $body;
-
         $mail->AltBody = strip_tags(
             str_replace(['<br>', '<br/>', '<br />'], "\n", $body)
         );
 
         return $mail->send();
-
     } catch (Exception $e) {
-        // Лог ошибок
-        $logMessage =
+        file_put_contents(
+            __DIR__ . '/mail_errors.log',
             date('Y-m-d H:i:s') .
             ' | SUBJECT: ' . $subject .
             ' | ERROR_INFO: ' . $mail->ErrorInfo .
             ' | EXCEPTION: ' . $e->getMessage() .
-            PHP_EOL;
-
-        file_put_contents(
-            __DIR__ . '/mail_errors.log',
-            $logMessage,
+            PHP_EOL,
             FILE_APPEND
         );
 

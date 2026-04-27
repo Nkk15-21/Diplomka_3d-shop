@@ -250,4 +250,55 @@ return [
     'admin.users.title' => 'Пользователи',
     'admin.users.subtitle' => 'Здесь отображаются все зарегистрированные пользователи сайта.',
     'admin.users.empty' => 'Пользователей пока нет.',
+
+    // Cart
+    'cart.title' => 'Корзина',
+    'cart.subtitle' => 'Ваши выбранные товары',
+    'cart.empty' => 'Корзина пока пуста.',
+    'cart.add' => 'В корзину',
+    'cart.added' => 'Товар добавлен в корзину.',
+    'cart.remove' => 'Удалить',
+    'cart.removed' => 'Товар удалён из корзины.',
+    'cart.update' => 'Обновить',
+    'cart.updated' => 'Количество обновлено.',
+    'cart.quantity' => 'Количество',
+    'cart.summary' => 'Итог',
+    'cart.items_count' => 'Товаров',
+    'cart.total' => 'Общая сумма',
+    'cart.checkout' => 'Оформить заказ',
+    'cart.continue' => 'Продолжить покупки',
+    'cart.checkout_success' => 'Заказ из корзины успешно оформлен.',
+    'cart.checkout_error' => 'Не удалось оформить заказ из корзины.',
+    'cart.empty_error' => 'Корзина пуста.',
+
+// Wishlist
+    'wishlist.title' => 'Избранное',
+    'wishlist.subtitle' => 'Здесь собраны товары, которые вы сохранили.',
+    'wishlist.empty' => 'В избранном пока ничего нет.',
+    'wishlist.add' => 'В избранное',
+    'wishlist.added' => 'Товар добавлен в избранное.',
+    'wishlist.remove' => 'Убрать',
+    'wishlist.removed' => 'Товар удалён из избранного.',
+    'wishlist.open' => 'Открыть',
+    'wishlist.in_wishlist' => 'В избранном',
+    'wishlist.remove_short' => 'Убрать ♥',
+
+// Product actions
+    'product.add_to_cart' => 'В корзину',
+    'product.add_to_wishlist' => 'Добавить в избранное',
+    'product.remove_from_wishlist' => 'Убрать из избранного',
+    'product.login_to_order' => 'Войти для заказа',
+
+// Common additions
+    'common.open' => 'Открыть',
+    'common.summary' => 'Итог',
+    'common.items' => 'Товары',
+    'common.back' => 'Назад',
+    'common.continue' => 'Продолжить',
+    'common.checkout' => 'Оформить заказ',
+    'common.remove' => 'Удалить',
+    'common.update' => 'Обновить',
+    'common.price' => 'Цена',
+    'common.total' => 'Итого',
+
 ];

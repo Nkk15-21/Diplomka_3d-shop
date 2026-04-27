@@ -250,4 +250,55 @@ return [
     'admin.users.title' => 'Kasutajad',
     'admin.users.subtitle' => 'Siin kuvatakse kõik saidi registreeritud kasutajad.',
     'admin.users.empty' => 'Kasutajaid veel pole.',
+
+    // Cart
+    'cart.title' => 'Ostukorv',
+    'cart.subtitle' => 'Sinu valitud tooted',
+    'cart.empty' => 'Ostukorv on tühi.',
+    'cart.add' => 'Lisa korvi',
+    'cart.added' => 'Toode lisati ostukorvi.',
+    'cart.remove' => 'Eemalda',
+    'cart.removed' => 'Toode eemaldati ostukorvist.',
+    'cart.update' => 'Uuenda',
+    'cart.updated' => 'Kogus uuendati.',
+    'cart.quantity' => 'Kogus',
+    'cart.summary' => 'Kokkuvõte',
+    'cart.items_count' => 'Tooteid',
+    'cart.total' => 'Kogusumma',
+    'cart.checkout' => 'Vormista tellimus',
+    'cart.continue' => 'Jätka ostmist',
+    'cart.checkout_success' => 'Ostukorvi tellimus vormistati edukalt.',
+    'cart.checkout_error' => 'Ostukorvi tellimust ei õnnestunud vormistada.',
+    'cart.empty_error' => 'Ostukorv on tühi.',
+
+// Wishlist
+    'wishlist.title' => 'Lemmikud',
+    'wishlist.subtitle' => 'Siin on tooted, mille oled salvestanud.',
+    'wishlist.empty' => 'Lemmikutes pole veel ühtegi toodet.',
+    'wishlist.add' => 'Lisa lemmikutesse',
+    'wishlist.added' => 'Toode lisati lemmikutesse.',
+    'wishlist.remove' => 'Eemalda',
+    'wishlist.removed' => 'Toode eemaldati lemmikutest.',
+    'wishlist.open' => 'Ava',
+    'wishlist.in_wishlist' => 'Lemmikutes',
+    'wishlist.remove_short' => 'Eemalda ♥',
+
+// Product actions
+    'product.add_to_cart' => 'Lisa korvi',
+    'product.add_to_wishlist' => 'Lisa lemmikutesse',
+    'product.remove_from_wishlist' => 'Eemalda lemmikutest',
+    'product.login_to_order' => 'Tellimiseks logi sisse',
+
+// Common additions
+    'common.open' => 'Ava',
+    'common.summary' => 'Kokkuvõte',
+    'common.items' => 'Tooted',
+    'common.back' => 'Tagasi',
+    'common.continue' => 'Jätka',
+    'common.checkout' => 'Vormista tellimus',
+    'common.remove' => 'Eemalda',
+    'common.update' => 'Uuenda',
+    'common.price' => 'Hind',
+    'common.total' => 'Kokku',
+
 ];

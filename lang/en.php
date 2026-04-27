@@ -250,4 +250,55 @@ return [
     'admin.users.title' => 'Users',
     'admin.users.subtitle' => 'All registered site users are shown here.',
     'admin.users.empty' => 'No users yet.',
+
+    // Cart
+    'cart.title' => 'Cart',
+    'cart.subtitle' => 'Your selected products',
+    'cart.empty' => 'Your cart is empty.',
+    'cart.add' => 'Add to cart',
+    'cart.added' => 'Product added to cart.',
+    'cart.remove' => 'Remove',
+    'cart.removed' => 'Product removed from cart.',
+    'cart.update' => 'Update',
+    'cart.updated' => 'Quantity updated.',
+    'cart.quantity' => 'Quantity',
+    'cart.summary' => 'Summary',
+    'cart.items_count' => 'Items',
+    'cart.total' => 'Total amount',
+    'cart.checkout' => 'Checkout',
+    'cart.continue' => 'Continue shopping',
+    'cart.checkout_success' => 'Cart order has been placed successfully.',
+    'cart.checkout_error' => 'Could not place the cart order.',
+    'cart.empty_error' => 'Cart is empty.',
+
+// Wishlist
+    'wishlist.title' => 'Wishlist',
+    'wishlist.subtitle' => 'Products you have saved.',
+    'wishlist.empty' => 'Your wishlist is empty.',
+    'wishlist.add' => 'Add to wishlist',
+    'wishlist.added' => 'Product added to wishlist.',
+    'wishlist.remove' => 'Remove',
+    'wishlist.removed' => 'Product removed from wishlist.',
+    'wishlist.open' => 'Open',
+    'wishlist.in_wishlist' => 'In wishlist',
+    'wishlist.remove_short' => 'Remove ♥',
+
+// Product actions
+    'product.add_to_cart' => 'Add to cart',
+    'product.add_to_wishlist' => 'Add to wishlist',
+    'product.remove_from_wishlist' => 'Remove from wishlist',
+    'product.login_to_order' => 'Log in to order',
+
+// Common additions
+    'common.open' => 'Open',
+    'common.summary' => 'Summary',
+    'common.items' => 'Items',
+    'common.back' => 'Back',
+    'common.continue' => 'Continue',
+    'common.checkout' => 'Checkout',
+    'common.remove' => 'Remove',
+    'common.update' => 'Update',
+    'common.price' => 'Price',
+    'common.total' => 'Total',
+
 ];

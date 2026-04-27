@@ -39,6 +39,10 @@ if (!empty($_SESSION['user_id']) && isset($mysqli) && $mysqli instanceof mysqli)
         $cartCount = (int)($stmt->get_result()->fetch_assoc()['cnt'] ?? 0);
         $stmt->close();
     }
+
+    if (!isset($mysqli)) {
+    require_once __DIR__ . '/db.php';
+    }
 }
 ?>
 <!DOCTYPE html>
@@ -128,8 +132,6 @@ if (!empty($_SESSION['user_id']) && isset($mysqli) && $mysqli instanceof mysqli)
             <a href="/3d_print_shop/catalog.php"><?= e(t('nav.catalog')) ?></a>
             <a href="/3d_print_shop/custom_order.php"><?= e(t('nav.custom_order')) ?></a>
             <a href="/3d_print_shop/services.php"><?= e(t('nav.services')) ?></a>
-            <a href="/3d_print_shop/blog.php"><?= e(t('nav.blog')) ?></a>
-
             <?php if (!empty($_SESSION['user_id']) && (($_SESSION['user_role'] ?? '') === 'admin')): ?>
                 <a href="/3d_print_shop/admin/index.php"><?= e(t('nav.admin')) ?></a>
             <?php endif; ?>

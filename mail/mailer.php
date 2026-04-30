@@ -39,28 +39,17 @@ function renderMailTemplate(string $templateName, array $data = []): string
     return (string)ob_get_clean();
 }
 
-function sendMailToAdmin(string $subject, string $body): bool
+function sendMailToAdmin(string $subject, string $body, ?string $replyToEmail = null, ?string $replyToName = null): bool
 {
     global $mailConfig;
 
-    $requiredKeys = [
-        'host',
-        'username',
-        'password',
-        'port',
-        'from_email',
-        'from_name',
-        'admin_email',
-    ];
-
-    foreach ($requiredKeys as $key) {
+    foreach (['host', 'username', 'password', 'port', 'from_email', 'from_name', 'admin_email'] as $key) {
         if (empty($mailConfig[$key])) {
             file_put_contents(
                 __DIR__ . '/mail_errors.log',
                 date('Y-m-d H:i:s') . ' | Missing mail config key: ' . $key . PHP_EOL,
                 FILE_APPEND
             );
-
             return false;
         }
     }
@@ -69,29 +58,34 @@ function sendMailToAdmin(string $subject, string $body): bool
 
     try {
         $mail->isSMTP();
-        $mail->Host = (string)$mailConfig['host'];
+        $mail->Host = trim((string)$mailConfig['host']);
         $mail->SMTPAuth = true;
-        $mail->Username = (string)$mailConfig['username'];
-        $mail->Password = (string)$mailConfig['password'];
+        $mail->Username = trim((string)$mailConfig['username']);
+        $mail->Password = preg_replace('/\s+/', '', (string)$mailConfig['password']);
         $mail->Port = (int)$mailConfig['port'];
-        $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+
+        $mail->SMTPSecure = ((int)$mailConfig['port'] === 465)
+            ? PHPMailer::ENCRYPTION_SMTPS
+            : PHPMailer::ENCRYPTION_STARTTLS;
 
         $mail->CharSet = 'UTF-8';
         $mail->Encoding = 'base64';
 
         $mail->setFrom(
-            (string)$mailConfig['from_email'],
+            trim((string)$mailConfig['from_email']),
             (string)$mailConfig['from_name']
         );
 
-        $mail->addAddress((string)$mailConfig['admin_email']);
+        $mail->addAddress(trim((string)$mailConfig['admin_email']));
+
+        if ($replyToEmail && filter_var($replyToEmail, FILTER_VALIDATE_EMAIL)) {
+            $mail->addReplyTo($replyToEmail, $replyToName ?: $replyToEmail);
+        }
 
         $mail->isHTML(true);
         $mail->Subject = $subject;
         $mail->Body = $body;
-        $mail->AltBody = strip_tags(
-            str_replace(['<br>', '<br/>', '<br />'], "\n", $body)
-        );
+        $mail->AltBody = strip_tags(str_replace(['<br>', '<br/>', '<br />'], "\n", $body));
 
         return $mail->send();
     } catch (Exception $e) {

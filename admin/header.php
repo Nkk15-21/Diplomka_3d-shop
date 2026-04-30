@@ -17,6 +17,20 @@ $flashError = getFlash('error');
     <link rel="stylesheet" href="/3d_print_shop/css/style.css">
 </head>
 <body>
+
+<?php
+$unreadContactsCount = 0;
+
+if (isset($mysqli) && $mysqli instanceof mysqli) {
+    $result = $mysqli->query("SELECT COUNT(*) AS cnt FROM contacts WHERE is_read = 0");
+
+    if ($result) {
+        $row = $result->fetch_assoc();
+        $unreadContactsCount = (int)($row['cnt'] ?? 0);
+    }
+}
+?>
+
 <div class="admin-layout">
     <aside class="admin-sidebar">
         <div class="admin-sidebar__logo">

@@ -66,15 +66,6 @@ declare(strict_types=1);
                     </div>
                 </div>
 
-                <div style="margin-bottom:28px;">
-                    <div style="padding:18px 20px; border-radius:18px; background:#eff6ff; border:1px solid #bfdbfe; color:#1e40af;">
-                        <div style="font-weight:800; margin-bottom:6px;">Что можно сделать дальше</div>
-                        <div style="line-height:1.6;">
-                            При необходимости ответь клиенту напрямую на его email или обработай запрос через админку.
-                        </div>
-                    </div>
-                </div>
-
                 <div style="padding-top:18px; border-top:1px solid #e5e7eb; color:#6b7280; font-size:14px;">
                     <strong style="color:#374151;">Дата:</strong>
                     <?= htmlspecialchars((string)$createdAt) ?>

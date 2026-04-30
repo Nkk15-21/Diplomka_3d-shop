@@ -44,12 +44,7 @@ $flashError = getFlash('error');
     </aside>
 
     <div class="admin-content">
-        <header class="admin-topbar">
-            <h1><?= e(t('admin.title')) ?></h1>
-            <div class="admin-topbar__user">
-                <?= e($_SESSION['user_name'] ?? 'admin') ?>
-            </div>
-        </header>
+
 
         <main class="admin-main">
             <?php if ($flashSuccess): ?>

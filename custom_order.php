@@ -148,14 +148,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $absoluteModelPath = __DIR__ . '/' . $modelFileForDb;
 
                 sendMailToAdmin(
-                        'New custom order / Новый индивидуальный заказ #' . $orderId,
-                        $mailBody,
+                    'New custom order / Новый индивидуальный заказ #' . $orderId,
+                    $mailBody,
+                    $customerEmail,
+                    $customerName,
+                    [
                         [
-                                [
-                                        'path' => $absoluteModelPath,
-                                        'name' => basename($modelFileForDb),
-                                ]
+                            'path' => $absoluteModelPath,
+                            'name' => basename($modelFileForDb),
                         ]
+                    ]
                 );
 
                 setFlash('success', t('custom.success'));
